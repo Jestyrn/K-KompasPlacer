@@ -20,9 +20,11 @@ internal class Program
 
     private static void StartNewTest()
     {
-        SetReady.Setup(Path); // почистит от пробелов и лишних символов в Entities.Text
-        TextsInfo = new List<TextInfo>(TextProcessor.GetCounterText(Path)); // парсинг текста (с шт)
-        Texts = new List<TextInfo>(TextProcessor.GetText(Path)); // парсинг текста
+        //SetReady.Setup(Path); // почистит от пробелов и лишних символов в Entities.Text
+        //TextsInfo = new List<TextInfo>(TextProcessor.GetCounterText(Path)); // парсинг текста (с шт)
+        //Texts = new List<TextInfo>(TextProcessor.GetText(Path)); // парсинг текста
+        NewTestsGPT ss = new NewTestsGPT();
+        ss.TryToDo(@"C:\Users\mrbug\OneDrive\Рабочий стол\Developers\K-Kompas\Edited.dxf");
 
         //NewTestsGPT.TryToDo(); // парсинг фигур
 
