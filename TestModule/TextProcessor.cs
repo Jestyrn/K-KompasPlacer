@@ -1,13 +1,6 @@
-﻿using netDxf;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection.PortableExecutable;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Vector3 = netDxf.Vector3;
 
-namespace TesterModule
+namespace TestModule
 {
     public class TextProcessor
     {
@@ -32,7 +25,7 @@ namespace TesterModule
                         CountText.Add(new TextInfo
                         {
                             Name = name,
-                            Vect = new Vector2(first, second)
+                            Vect = new Vector3(first, second, 0)
                         });
                     }
                 }
@@ -62,7 +55,7 @@ namespace TesterModule
                         Text.Add(new TextInfo
                         {
                             Name = name,
-                            Vect = new Vector2(first, second)
+                            Vect = new Vector3(first, second, 0)
                         });
                     }
                 }
@@ -81,6 +74,6 @@ namespace TesterModule
         // если встретилось "Р-2 5 шт" и "Р-2 1 шт" - сделать единую "Р-2 6 шт"
 
         public string Name;
-        public Vector2 Vect;
+        public Vector3 Vect;
     }
 }

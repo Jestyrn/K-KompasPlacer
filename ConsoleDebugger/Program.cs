@@ -1,10 +1,6 @@
 ﻿using netDxf;
-using netDxf.Blocks;
-using netDxf.Collections;
-using netDxf.Entities;
-using System.Drawing;
-using System.Reflection.Metadata;
-using TesterModule;
+using TestModule;
+using TextInfo = TestModule.TextInfo;
 
 internal class Program
 {

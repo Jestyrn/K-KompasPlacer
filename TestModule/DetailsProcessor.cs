@@ -1,13 +1,9 @@
 ﻿using netDxf;
 using netDxf.Blocks;
 using netDxf.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Vector3 = netDxf.Vector3;
 
-namespace TesterModule
+namespace TestModule
 {
     public class DetailsProcessor
     {
@@ -16,7 +12,7 @@ namespace TesterModule
             DxfDocument dxf = DxfDocument.Load(path);
             List<Block> blocks = (List<Block>)dxf.Blocks.ToList().Where(x => !x.Name.Contains("*")).ToList();
             List<EntityObject> ents = new List<EntityObject>();
-            
+
             List<Detail> details = new List<Detail>();
 
             foreach (var block in blocks)
