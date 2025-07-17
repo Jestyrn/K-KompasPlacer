@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36212.18
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReqConsoleDebugger", "ConsoleDebugger\ReqConsoleDebugger.csproj", "{3495D9BD-99CF-42E3-82BC-FBF547617BF3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleDebugger", "ConsoleDebugger\ConsoleDebugger.csproj", "{3495D9BD-99CF-42E3-82BC-FBF547617BF3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReqTestModule", "TestModule\ReqTestModule.csproj", "{057F1075-E661-4D32-931B-BDCD9774190C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestModule", "TestModule\TestModule.csproj", "{057F1075-E661-4D32-931B-BDCD9774190C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
