@@ -1,41 +1,40 @@
-# 💥 KompasPlacer 3000 💥 - The Problematic Parts Placer
+<p align="center">
+<img src="https://github.com/Jestyrn/K-KompasPlacer/blob/master/Readme/my-logo.png" height="100">
+<img src="https://github.com/Jestyrn/K-KompasPlacer/blob/master/Readme/KWORK.png" height="100">
+</p>
 
-**"Helping engineers not lose their minds while placing hundreds of parts manually!"**
+<h1 align="center">Jestyrn for - Kwork</h1>
 
-&nbsp;&nbsp;English&nbsp;&nbsp;|&nbsp;&nbsp;[Русский](/README-RU.md)<br/>
+<h2 align="center">Preview</h2>
 
-### 🚧 Current Status:
-[no] - Code written (but no guarantee it works)  
-[  -  ] - First launches (fire, smoke, screaming)  
-[🤖] - Algorithm learning to live (and hating us)  
-[💀] - Testing (RIP my nerves)
+<p align="center">
+  <img src="https://github.com/Jestyrn/K-KompasPlacer/blob/master/Readme/S-NotReady.png?raw=true" width="300">
+  <img src="https://github.com/Jestyrn/K-KompasPlacer/blob/master/Readme/D-NotReady.png?raw=true" width="300">
+</p>
 
-### 🎯 Features (or bugs? who knows):
-- **Loads** `.dxf` and revenge plans
-- **Arranges** parts using the "maybe it'll fit?" method
-- **Calculates** waste (and your tears)
-- **Generates** BOM (sometimes)
+<h2>How it work</h2>
 
-### 🤯 How to Use:
-1. Throw file into program
-2. Yell "FASTER DAMMIT" at monitor
-3. ???
-4. PROFIT!
+- The user loads a `.dxf` file with details (yes, the same drawing that someone lovingly made in CAD for three nights in a row).
+- They specify the frame dimensions, which is like telling the program, "Here are the boundaries of reality, work within them."
+- Then, the `netDxf` library comes into play (thanks to its authors, who are the best):
+ - We read all the elements from the drawing;
+ - We extract the components (sometimes even those that have been forgotten to delete);
+ - Read the specifications (if there are any — we don't insist, but it's nice).
 
-*(If it crashes - it's not a bug, it's avant-garde performance art)*
+- Based on the entered dimensions, create a frame — not spiritual, but rectangular, in millimeters.
+- The automatic Tetris algorithm is enabled:
+ - Count how much free space there is;
+ - Look for a suitable part (which will not go beyond the edges or climb on its neighbor);
+ - Place it (yes, with all the love and respect for precision);
+ - Count the free space again;
+ - Repeat as long as there is someone to put.
 
-### 💬 Tester Reviews:
-> ~ "It's alive... And angry" ~ <br/>
-> ~ "I've seen hell, and this is it" ~ <br/>
-> ~ "10/10, broke my heart again" ~ <br/>
+- If there are no suitable parts left:
+ - Spawn a new frame (that's it, no downloads or microtransactions
 
-⚠️ **Warning!** May:
-- Suddenly fall asleep (at this speed, maybe you too XD)
-- Eat your file
-- Start machine revolution
+<hr>
 
-*(But we call these "features")*
-
-🔮 **Future Plans:**
-- "Holy Spirit, fix this!" button
-- "Faster" button *(that does absolutely nothing)*
+<p align="center">
+  <strong>Jestyrn – 2025</strong><br>
+  <sub>License - MIT</sub>
+</p>
