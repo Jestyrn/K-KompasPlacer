@@ -1,37 +1,45 @@
 <p align="center">
-<img src="https://github.com/Jestyrn/K-KompasPlacer/blob/master/Readme/my-logo.png" height="100">
-<img src="https://github.com/Jestyrn/K-KompasPlacer/blob/master/Readme/KWORK.png" height="100">
+<img src="https://github.com/Jestyrn/K-KompasPlacer/blob/master/Readme/my-logo.png" height="150">
+<img src="https://github.com/Jestyrn/K-KompasPlacer/blob/master/Readme/KWORK.png" width="150">
 </p>
 
 <h1 align="center">Jestyrn for - Kwork</h1>
 
-<h2 align="center">Preview</h2>
+<p align="center">
+  English | <a href="/README-RU.md">Russian</a>
+</p>
+
+<h2>Preview</h2>
 
 <p align="center">
-  <img src="https://github.com/Jestyrn/K-KompasPlacer/blob/master/Readme/S-NotReady.png?raw=true" width="300">
-  <img src="https://github.com/Jestyrn/K-KompasPlacer/blob/master/Readme/D-NotReady.png?raw=true" width="300">
+  <img src="https://github.com/Jestyrn/K-KompasPlacer/blob/master/Readme/S-NotReady.png?raw=true" width="350">
+  <img src="https://github.com/Jestyrn/K-KompasPlacer/blob/master/Readme/D-NotReady.png?raw=true" width="350">
 </p>
 
 <h2>How it work</h2>
 
-- The user loads a `.dxf` file with details (yes, the same drawing that someone lovingly made in CAD for three nights in a row).
-- They specify the frame dimensions, which is like telling the program, "Here are the boundaries of reality, work within them."
-- Then, the `netDxf` library comes into play (thanks to its authors, who are the best):
- - We read all the elements from the drawing;
- - We extract the components (sometimes even those that have been forgotten to delete);
- - Read the specifications (if there are any — we don't insist, but it's nice).
+- The user uploads a `.dxf` file with details (yes, with the very drawing that someone lovingly made in CAD for three nights in a row).
+- Specifies the size of the frame — it's like telling the program: "these are the boundaries of reality, work inside."
+- Next, the netDxf library comes into play (thanks to the authors, you are the best):
+  - We read all the elements from the drawing;
+  - We take out the components (sometimes even what we have long forgotten to remove);
+  - We read the specifications (if there are any, we don't insist, but it's nice).
 
-- Based on the entered dimensions, create a frame — not spiritual, but rectangular, in millimeters.
-- The automatic Tetris algorithm is enabled:
- - Count how much free space there is;
- - Look for a suitable part (which will not go beyond the edges or climb on its neighbor);
- - Place it (yes, with all the love and respect for precision);
- - Count the free space again;
- - Repeat as long as there is someone to put.
+- Based on the entered dimensions, we create a frame — not a spiritual one, but a rectangular one, in millimeters.
+- The automatic Tetris algorithm is activated:
+  - We calculate how much free space there is;
+  - We are looking for a suitable part (which will not go over the edges and will not climb on the neighbor);
+  - We post it (yes, with all love and respect for accuracy);
+  - We're counting the available space again;
+  - We repeat while there is someone to put down.
 
 - If there are no suitable parts left:
- - Spawn a new frame (that's it, no downloads or microtransactions
+  - Create a new frame (just like that, without downloads and microtransactions);
+  - We continue the placement as if nothing had happened.
 
+- When the details run out:
+  - The program says, "That's it, we're done, live in peace";
+  - And saves the result in `.dxf` so that you can open it later, print it out, or proudly show it to your superiors.
 <hr>
 
 <p align="center">
