@@ -3,20 +3,20 @@
   <img src="https://github.com/Jestyrn/K-KompasPlacer/blob/master/Readme/KWORK.png" width="150">
 </p>
 
-<h1 align="center">Jestyrn for - Kwork</h1>
+<h1 align="center">Jestyrn - проект из Кворка</h1>
 
 <p align="center">
   <a href="/README.md">Английский</a> | Русский
 </p>
 
-<h2>Preview</h2>
+<h2>Предпросмотр</h2>
 
 <p align="center">
   <img src="https://github.com/Jestyrn/K-KompasPlacer/blob/master/Readme/S-NotReady.png?raw=true" width="350">
   <img src="https://github.com/Jestyrn/K-KompasPlacer/blob/master/Readme/D-NotReady.png?raw=true" width="350">
 </p>
 
-<h2>How it work</h2>
+<h2>Как это работает?</h2>
 
 - Пользователь загружает `.dxf`-файл с деталями (да, с тем самым чертежом, который кто-то с любовью делал в CAD-е три ночи подряд).
 - Указывает размеры рамки — это как сказать программе: "вот границы реальности, работай внутри".
