@@ -43,6 +43,7 @@ namespace TestModule
         public double Height { get; private set; } = 0;
 
         private List<Vector3> _points = new List<Vector3>();
+        private List<Vector3> _siluette = new List<Vector3>();
 
         public Detail(List<EntityObject> objects)
         {
@@ -64,6 +65,8 @@ namespace TestModule
                 maxX = Math.Max(maxX, point.X);
                 maxY = Math.Max(maxY, point.Y);
             }
+
+            DetectSquare();
 
             Width = maxX - minX;
             Height = maxY - minY;
@@ -172,6 +175,19 @@ namespace TestModule
                 x * sin + y * cos + Origin.Y,
                 0
             );
+        }
+
+        private void DetectSquare()
+        {
+            // просмотреть варинаты решения
+
+            // первый вариант (оптимальный)
+            // 1. сделать поиск силуэта
+            //      а) убрать все лишнее (все что внутри детали)
+            //      б) оставить контур детали (только его)
+            //      в) упростить (разбить на прямоугольники)
+            //      г) найти площадь каждой разбитой фигуры
+            //      д) суммировать все площади (сумма и будет результатом этой работы)
         }
     }
 }
