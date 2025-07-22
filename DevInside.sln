@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleDebugger", "ConsoleD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestModule", "TestModule\TestModule.csproj", "{057F1075-E661-4D32-931B-BDCD9774190C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mrthods", "Mrthods\Mrthods.csproj", "{8E3B6C7C-746E-4BFB-8C75-813F6A23DDFE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{057F1075-E661-4D32-931B-BDCD9774190C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{057F1075-E661-4D32-931B-BDCD9774190C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{057F1075-E661-4D32-931B-BDCD9774190C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E3B6C7C-746E-4BFB-8C75-813F6A23DDFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E3B6C7C-746E-4BFB-8C75-813F6A23DDFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E3B6C7C-746E-4BFB-8C75-813F6A23DDFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E3B6C7C-746E-4BFB-8C75-813F6A23DDFE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
