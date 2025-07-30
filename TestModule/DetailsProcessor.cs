@@ -1,5 +1,6 @@
 ﻿using netDxf;
 using netDxf.Blocks;
+using netDxf.Collections;
 using netDxf.Entities;
 using Vector3 = netDxf.Vector3;
 
@@ -7,13 +8,13 @@ namespace TestModule
 {
     public class DetailsProcessor
     {
-        public static List<Detail> GetAllDetails(string path)
+        public static List<Details> GetAllDetails(string path)
         {
             DxfDocument dxf = DxfDocument.Load(path);
             List<Block> blocks = (List<Block>)dxf.Blocks.ToList().Where(x => !x.Name.Contains("*")).ToList();
             List<EntityObject> ents = new List<EntityObject>();
 
-            List<Detail> details = new List<Detail>();
+            List<Details> details = new List<Details>();
 
             foreach (var block in blocks)
             {
@@ -24,7 +25,7 @@ namespace TestModule
 
                 if (ents.Count != 0)
                 {
-                    details.Add(new Detail(ents));
+                    details.Add(new Details(ents));
                     ents.Clear();
                 }
             }
@@ -33,153 +34,255 @@ namespace TestModule
         }
     }
 
-    public class Detail
+    public class Details : IComparable<Details>
     {
-        public List<EntityObject> Entities { get; private set; } = new List<EntityObject>();
-        public int Quantity { get; set; }
-        public Vector3 Origin { get; private set; }
-        public double Angle { get; private set; }
-        public double Width { get; private set; } = 0;
-        public double Height { get; private set; } = 0;
+        public List<EntityObject> Entities { get; private set; }
+        public Vector3 Center { get; private set; }
 
-        private List<Vector3> _points = new List<Vector3>();
-        private List<Vector3> _siluette = new List<Vector3>();
+        public double Width { get; private set; }
+        public double Height { get; private set; }
+        public double Area { get; private set; }
+        public BoundingBox Bounds { get; private set; }
+        public List<EntityObject> BoundsDXF { get; private set; } = new List<EntityObject>();
 
-        public Detail(List<EntityObject> objects)
+        private List<Vector3> points = new List<Vector3>();
+
+        private double minX;
+        private double minY;
+        private double maxX;
+        private double maxY;
+
+        public Details(List<EntityObject> objects)
         {
-            Entities.AddRange(objects);
-
-            GetAllPOints();
-            FindCenter();
-            GetAngle();
-
-            double maxX, maxY, minX, minY;
-            minX = minY = double.MaxValue;
-            maxX = maxY = double.MinValue;
-
-            foreach (var point in _points)
-            {
-                minX = Math.Min(minX, point.X);
-                minY = Math.Min(minY, point.Y);
-
-                maxX = Math.Max(maxX, point.X);
-                maxY = Math.Max(maxY, point.Y);
-            }
-
-            DetectSquare();
-
-            Width = maxX - minX;
-            Height = maxY - minY;
+            Entities = new List<EntityObject>(objects);
+            CompletePrepairs();
+            FindBestAngle();
         }
 
-        private void GetAngle()
+        private void CompletePrepairs()
         {
-            if (_points.Count < 2) return;
-
-            double xx = 0, xy = 0;
-            foreach (var p in _points)
-            {
-                xx += (p.X - Origin.X) * (p.X - Origin.X);
-                xy += (p.X - Origin.X) * (p.Y - Origin.Y);
-            }
-
-            Angle = 0.5 * Math.Atan2(2 * xy, xx) * (180 / Math.PI);
+            FindPoints();
+            FindMinMax();
+            FindGeometry();
         }
 
-        private void FindCenter()
+        public void MoveDetail(double x, double y)
         {
-            if (Entities.Count == 0)
-            {
-                Origin = Vector3.Zero;
-                return;
-            }
+            Vector3 newPoint = new Vector3(x, y, 0);
 
-            double sumX, sumY;
-            sumX = sumY = 0;
-
-            int cnt = 0;
-
-            foreach (var point in _points)
-            {
-                sumX += point.X;
-                sumY += point.Y;
-
-                cnt++;
-            }
-
-            Origin = new Vector3(sumX / (double)cnt, sumY / (double)cnt, 0);
-        }
-
-        private void GetAllPOints()
-        {
-            foreach (var item in Entities)
-            {
-                switch (item.Type)
-                {
-                    case EntityType.Arc:
-                        _points.Add(((Arc)item).Center);
-                        break;
-                    case EntityType.Circle:
-                        _points.Add(((Circle)item).Center);
-                        break;
-                    case EntityType.Insert:
-                        _points.Add(((Insert)item).Position);
-                        break;
-                    case EntityType.Line:
-                        _points.Add(((Line)item).StartPoint);
-                        _points.Add(((Line)item).EndPoint);
-                        break;
-                }
-            }
-        }
-
-        public List<EntityObject> RotateDetail(double angle)
-        {
-            double radians = angle * Math.PI / 180;
+            Vector3 offset = new Vector3(
+                x - Bounds.MinX,
+                y - Bounds.MaxY,
+                0);
 
             foreach (var entity in Entities)
             {
                 switch (entity)
                 {
                     case Line line:
-                        line.StartPoint = RotatePoint(line.StartPoint, radians);
-                        line.EndPoint = RotatePoint(line.EndPoint, radians);
-                        break;
-
-                    case Arc arc:
-                        arc.Center = RotatePoint(arc.Center, radians);
-                        arc.StartAngle += angle;
-                        arc.EndAngle += angle;
+                        line.StartPoint = ApplyOffset(line.StartPoint, offset);
+                        line.EndPoint = ApplyOffset(line.EndPoint, offset);
                         break;
 
                     case Circle circle:
-                        circle.Center = RotatePoint(circle.Center, radians);
+                        circle.Center = ApplyOffset(circle.Center, offset);
+                        break;
+
+                    case Arc arc:
+                        arc.Center = ApplyOffset(arc.Center, offset);
+                        break;
+
+                    case Ellipse ellipse:
+                        ellipse.Center = ApplyOffset(ellipse.Center, offset);
                         break;
                 }
             }
-            Angle = (Angle + angle) % 360;
 
-            return Entities;
+            CompletePrepairs();
         }
 
-        private Vector3 RotatePoint(Vector3 point, double angleRadians)
+        private Vector3 ApplyOffset(Vector3 point, Vector3 offset)
         {
-            double cos = Math.Cos(angleRadians);
-            double sin = Math.Sin(angleRadians);
+            return new Vector3(
+                point.X + offset.X,
+                point.Y + offset.Y,
+                point.Z);
+        }
 
-            double x = point.X - Origin.X;
-            double y = point.Y - Origin.Y;
+        private void FindBestAngle()
+        {
+            double fullAngle = 360;
+            int step = 360;
+
+            // список <угол, площадь>
+            Dictionary<double, double> anglArea = new Dictionary<double, double>();
+
+            for (double i = 0; i <= fullAngle; i += fullAngle/step)
+            {
+                RotateDetail(i);
+                anglArea.Add(i, Area);
+                RotateDetail(-i);
+            }
+
+            anglArea = anglArea.OrderByDescending(p => p.Value).ToDictionary();
+
+            double bestAngle = 0;
+            double lowerArea = double.MaxValue;
+
+            foreach (var pare in anglArea)
+            {
+                if (lowerArea > pare.Value)
+                {
+                    bestAngle = pare.Key;
+                    lowerArea = pare.Value;
+                }
+            }
+
+            RotateDetail(bestAngle);
+        }
+
+        private Vector3 RotatePointAroundOrigin(Vector3 point, double cos, double sin)
+        {
+            double x = point.X - Center.X;
+            double y = point.Y - Center.Y;
 
             return new Vector3(
-                x * cos - y * sin + Origin.X,
-                x * sin + y * cos + Origin.Y,
-                0
-            );
+                x * cos - y * sin + Center.X,
+                x * sin + y * cos + Center.Y,
+                0);
         }
 
-        private void DetectSquare()
+        private double NormalizeAngle(double angle)
         {
-
+            angle %= 360;
+            return angle < 0 ? angle + 360 : angle;
         }
+
+        public void RotateDetail(double angle)
+        {
+            if (Math.Abs(angle) == 0) return;
+            else if (Math.Abs(angle) < 0.001) return;
+
+            angle = NormalizeAngle(angle);
+
+            double rad = angle * Math.PI / 180;
+            double cos = Math.Cos(rad);
+            double sin = Math.Sin(rad);
+
+            foreach (var item in Entities)
+            {
+                switch (item)
+                {
+                    case Line line:
+                        line.StartPoint = RotatePointAroundOrigin(line.StartPoint, cos, sin);
+                        line.EndPoint = RotatePointAroundOrigin(line.EndPoint, cos, sin);
+                        break;
+
+                    case Circle circle:
+                        circle.Center = RotatePointAroundOrigin(circle.Center, cos, sin);
+                        break;
+
+                    case Arc arc:
+                        arc.Center = RotatePointAroundOrigin(arc.Center, cos, sin);
+                        arc.StartAngle = NormalizeAngle(arc.StartAngle + angle);
+                        arc.EndAngle = NormalizeAngle(arc.EndAngle + angle);
+                        break;
+                }
+            }
+
+            FindPoints();
+            FindMinMax();
+            FindGeometry();
+        }
+
+        private void FindGeometry()
+        {
+            Width = Math.Abs(maxX - minX);
+            Height = Math.Abs(maxY - minY);
+            Center = new Vector3(Width/2, Height/2, 0);
+            Area = Width * Height;
+
+            Bounds = new BoundingBox(minX, maxX, minY, maxY);
+            BoundsDXF = new List<EntityObject>
+            {
+                new Line(new Vector2(minX, minY), new Vector2(minX, maxY)),
+                new Line(new Vector2(minX, maxY), new Vector2(maxX, maxY)),
+                new Line(new Vector2(maxX, maxY), new Vector2(maxX, minY)),
+                new Line(new Vector2(maxX, minY), new Vector2(minX, minY)),
+            };
+        }
+
+        private void FindMinMax()
+        {
+            minX = double.MaxValue;
+            minY = double.MaxValue;
+            maxX = double.MinValue;
+            maxY = double.MinValue;
+
+            foreach (var p in points)
+            {
+                minX = Math.Min(minX, p.X);
+                minY = Math.Min(minY, p.Y);
+
+                maxX = Math.Max(maxX, p.X);
+                maxY = Math.Max(maxY, p.Y);
+            }
+        }
+
+        private void FindPoints()
+        {
+            points.Clear();
+            foreach (EntityObject obj in Entities)
+            {
+                switch (obj)
+                {
+                    case Arc arc:
+                        points.Add(arc.Center);
+                        break;
+
+                    case Circle circ:
+                        points.Add(circ.Center);
+                        break;
+
+                    case Line line:
+                        points.Add(line.StartPoint);
+                        points.Add(line.EndPoint);
+                        break;
+
+                    case Point p:
+                        points.Add(p.Position);
+                        break;
+                }
+            }
+        }
+
+        public int CompareTo(Details other)
+        {
+            if (other == null) return 1;
+            return Area.CompareTo(other.Area);
+        }
+    }
+
+    public class BoundingBox
+    {
+        public double MinX { get; }
+        public double MaxX { get; }
+        public double MinY { get; }
+        public double MaxY { get; }
+
+        public BoundingBox(double minX, double maxX, double minY, double maxY)
+        {
+            MinX = minX;
+            MaxX = maxX;
+            MinY = minY;
+            MaxY = maxY;
+        }
+    }
+
+    public class AreaInfo
+    {
+        public double Area { get; set; }
+        public int AreaInt { get; set; }
+        public int Angle { get; set; }
     }
 }
