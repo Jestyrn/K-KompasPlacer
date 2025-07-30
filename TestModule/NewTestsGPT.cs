@@ -1,4 +1,8 @@
-﻿namespace TestModule
+﻿using netDxf;
+using netDxf.Blocks;
+using netDxf.Entities;
+
+namespace TestModule
 {
     public class NewTestsGPT
     {
