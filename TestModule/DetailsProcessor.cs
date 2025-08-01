@@ -8,13 +8,13 @@ namespace TestModule
 {
     public class DetailsProcessor
     {
-        public static List<Details> GetAllDetails(string path)
+        public static List<Detail> GetAllDetails(string path)
         {
             DxfDocument dxf = DxfDocument.Load(path);
             List<Block> blocks = (List<Block>)dxf.Blocks.ToList().Where(x => !x.Name.Contains("*")).ToList();
             List<EntityObject> ents = new List<EntityObject>();
 
-            List<Details> details = new List<Details>();
+            List<Detail> details = new List<Detail>();
 
             foreach (var block in blocks)
             {
@@ -25,7 +25,7 @@ namespace TestModule
 
                 if (ents.Count != 0)
                 {
-                    details.Add(new Details(ents));
+                    details.Add(new Detail(ents));
                     ents.Clear();
                 }
             }
@@ -34,7 +34,7 @@ namespace TestModule
         }
     }
 
-    public class Details : IComparable<Details>
+    public class Detail : IComparable<Detail>
     {
         public List<EntityObject> Entities { get; private set; }
         public Vector3 Center { get; private set; }
@@ -52,7 +52,7 @@ namespace TestModule
         private double maxX;
         private double maxY;
 
-        public Details(List<EntityObject> objects)
+        public Detail(List<EntityObject> objects)
         {
             Entities = new List<EntityObject>(objects);
             CompletePrepairs();
@@ -256,7 +256,7 @@ namespace TestModule
             }
         }
 
-        public int CompareTo(Details other)
+        public int CompareTo(Detail other)
         {
             if (other == null) return 1;
             return Area.CompareTo(other.Area);
@@ -270,12 +270,22 @@ namespace TestModule
         public double MinY { get; }
         public double MaxY { get; }
 
+        public double Width { get; }
+        public double Height { get; }
+        
+        public double Area { get; }
+
         public BoundingBox(double minX, double maxX, double minY, double maxY)
         {
             MinX = minX;
             MaxX = maxX;
             MinY = minY;
             MaxY = maxY;
+
+            Width = Math.Abs(MaxX - MinX);
+            Height = Math.Abs(MaxY - MinY);
+        
+            Area = Width * Height;
         }
     }
 
