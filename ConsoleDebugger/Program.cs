@@ -10,7 +10,7 @@ internal class Program
     private static DxfDocument DXF = new DxfDocument();
     private static List<TextInfo> Texts;
     private static List<TextInfo> TextsInfo;
-    private static List<Details> Details;
+    private static List<Detail> Details;
     private static string Path = @"C:\Users\mrbug\OneDrive\Рабочий стол\Developers\K-Kompas\Kwork.dxf";
 
     private static void Main(string[] args)
