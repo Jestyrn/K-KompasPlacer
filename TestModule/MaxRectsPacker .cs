@@ -2,7 +2,7 @@
 {
     public class MaxRectsPacker
     {
-        public List<Rectangle> FreeRects { get; private set; }
+        public List<CustRectangle> FreeRects { get; private set; }
         public List<PlacedPart> PlacedParts { get; private set; }
         public double SheetWidth { get; private set; }
         public double SheetHeight { get; private set; }
@@ -11,7 +11,7 @@
         {
             SheetWidth = sheetWidth;
             SheetHeight = sheetHeight;
-            FreeRects = new List<Rectangle> { new Rectangle(0, 0, sheetWidth, sheetHeight) };
+            FreeRects = new List<CustRectangle> { new CustRectangle(0, 0, sheetWidth, sheetHeight) };
             PlacedParts = new List<PlacedPart>();
         }
 
@@ -34,10 +34,10 @@
             return false;
         }
 
-        private bool TryPlace(double width, double height, out Rectangle placement)
+        private bool TryPlace(double width, double height, out CustRectangle placement)
         {
             placement = null;
-            Rectangle bestRect = null;
+            CustRectangle bestRect = null;
             double bestScore = int.MaxValue;
 
             // Ищем лучший свободный прямоугольник
@@ -61,16 +61,16 @@
             if (bestRect == null) return false;
 
             // Размещаем в левый нижний угол
-            placement = new Rectangle(bestRect.X, bestRect.Y, width, height);
+            placement = new CustRectangle(bestRect.X, bestRect.Y, width, height);
 
             // Обновляем список свободных областей
             SplitFreeRects(placement);
             return true;
         }
 
-        private void SplitFreeRects(Rectangle placedRect)
+        private void SplitFreeRects(CustRectangle placedRect)
         {
-            List<Rectangle> newRects = new List<Rectangle>();
+            List<CustRectangle> newRects = new List<CustRectangle>();
 
             foreach (var freeRect in FreeRects)
             {
@@ -83,14 +83,14 @@
                 // Разделение по вертикали
                 if (placedRect.X > freeRect.X)
                 {
-                    newRects.Add(new Rectangle(
+                    newRects.Add(new CustRectangle(
                         freeRect.X, freeRect.Y,
                         placedRect.X - freeRect.X, freeRect.Height));
                 }
 
                 if (placedRect.Right < freeRect.Right)
                 {
-                    newRects.Add(new Rectangle(
+                    newRects.Add(new CustRectangle(
                         placedRect.Right, freeRect.Y,
                         freeRect.Right - placedRect.Right, freeRect.Height));
                 }
@@ -98,14 +98,14 @@
                 // Разделение по горизонтали
                 if (placedRect.Y > freeRect.Y)
                 {
-                    newRects.Add(new Rectangle(
+                    newRects.Add(new CustRectangle(
                         freeRect.X, freeRect.Y,
                         freeRect.Width, placedRect.Y - freeRect.Y));
                 }
 
                 if (placedRect.Bottom < freeRect.Bottom)
                 {
-                    newRects.Add(new Rectangle(
+                    newRects.Add(new CustRectangle(
                         freeRect.X, placedRect.Bottom,
                         freeRect.Width, freeRect.Bottom - placedRect.Bottom));
                 }
@@ -141,34 +141,5 @@
         public Part Part { get; set; }
         public double X { get; set; }
         public double Y { get; set; }
-    }
-
-    public class Rectangle
-    {
-        public double X { get; private set; }
-        public double Y { get; private set; }
-        public double Width { get; private set; }
-        public double Height { get; private set; }
-
-        public double Left { get; private set; }
-        public double Right { get; private set; }
-        public double Top { get; private set; }
-        public double Bottom { get; private set; }
-
-        public Rectangle(double x, double y, double width, double height)
-        {
-            X = x;
-            Y = y;
-            Width = width;
-            Height = height;
-        }
-
-        public bool Intersects(Rectangle other)
-        {
-            return X < other.X + other.Width &&
-                   X + Width > other.X &&
-                   Y < other.Y + other.Height &&
-                   Y + Height > other.Y;
-        }
     }
 }
