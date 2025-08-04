@@ -2,198 +2,162 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using netDxf;
 
 namespace TestModule
 {
-    internal class FrameEngine
+    public class FrameEngine
     {
-        /*
-         * 
-         * 1. Вызов TryPlacePart()
-         * Попытка разместить без поворота
-         * Попытка разместить с 90 градусами
-         * (Вызов TryPlace)
-         * 
-         * 2. TryPlace()
-         * Поиск свободного пространства(цикл)
-         * Смотрим по эвристике(Best Short Side Fit)
-         * Находим лучшее совпадение
-         * Размещаем в Frame
-         * Делаем Split()
-         *
-         * 3. Split()
-         * Делим область на вертикаль
-         * Делим область на горизонталь
-         * Урезаем лишнее(поглощенные)
-         * MergeFreeSpace()
-         * 
-         * 4. MergeFreeSpace()
-         * Удаляем поглощение
-         * 
-         */
-        private List<Detail> PlacedDetails = new List<Detail>();
-        private List<Detail> SourceDetails = new List<Detail>();
-        private List<CustRectangle> FreeRects = new List<CustRectangle>();
-        private CustRectangle SourceRect;
-        private Detail detail;
+        private List<BoundingBox> FreeRects = new List<BoundingBox>();
+        private BoundingBox ReturnedBounds;
 
-        public FrameEngine(FrameBuilder frame, Detail detail)
+        private double MinX = 0;
+        private double MinY = 0;
+        private double Width = 0;
+        private double Height = 0;
+        private double Area = 0;
+
+        public double FreeArea = 0;
+
+
+        public FrameEngine(BoundingBox frame)
         {
-            FreeRects.Clear();
-            FreeRects.Add(new CustRectangle(
-                frame.BoundingBox.MinX,
-                frame.BoundingBox.MinY,
-                frame.BoundingBox.Width,
-                frame.BoundingBox.Height
-                ));
+            FreeRects.Add(frame);
+            MinX = frame.MinX;
+            MinY = frame.MinY;
+            Width = frame.Width;
+            Height = frame.Height;
+            Area = frame.Area;
+            FreeArea = Area;
 
-            SourceRect = FreeRects[0];
-            this.detail = detail;
+            ReturnedBounds = new BoundingBox(0, 0, 0, 0);
         }
 
-        public bool TryPlaceDetail(Detail detail)
+        public void UpdateFrame(BoundingBox newFrame)
         {
-            if (TryPlace(detail.Width, detail.Height, out var rect))
+            FreeRects.Clear();
+            FreeRects.Add(newFrame);
+            MinX = newFrame.MinX;
+            MinY = newFrame.MinY;
+            Width = newFrame.Width;
+            Height = newFrame.Height;
+            Area = newFrame.Area;
+            FreeArea = Area;
+        }
+
+        public bool TryPlaceDetail(Detail detail, out bool needRotate, out BoundingBox place)
+        {
+            place = new BoundingBox(0,0,0,0);
+            needRotate = false;
+
+            if (detail.Area > Area) return false;
+
+            if (TryInsert(detail.Width, detail.Height))
             {
-                PlacedDetails.Add(detail);
+                place = ReturnedBounds;
+                return true;
+            }
+            else if(TryInsert(detail.Height, detail.Width))
+            {
+                place = ReturnedBounds;
+                needRotate = true;
                 return true;
             }
 
-            if (TryPlace(detail.Height, detail.Width, out rect))
-            {
-                detail.RotateDetail(90);
-                PlacedDetails.Add(detail);
-                return true;
-            }
-
-            Console.WriteLine("Не получилось разместить");
+            Console.WriteLine("Деталька не встала");
             return false;
         }
 
-        private bool TryPlace(double width, double height, out CustRectangle placement)
+        private bool TryInsert(double width, double height)
         {
-            placement = null;
-            CustRectangle bestRect = null;
             double bestScore = int.MaxValue;
+            BoundingBox bestBox = null;
 
-            // Ищем лучший свободный прямоугольник
-            foreach (var freeRect in FreeRects)
+            foreach (var rect in FreeRects)
             {
-                if (freeRect.Width >= width && freeRect.Height >= height)
+                if (rect.Width >= width & rect.Height >= height)
                 {
-                    // Эвристика: Best Short Side Fit
-                    double leftoverHoriz = freeRect.Width - width;
-                    double leftoverVert = freeRect.Height - height;
+                    double leftoverHoriz = rect.Width - width;
+                    double leftoverVert = rect.Height - height;
                     double score = Math.Min(leftoverHoriz, leftoverVert);
 
                     if (score < bestScore)
                     {
                         bestScore = score;
-                        bestRect = freeRect;
+                        bestBox = rect;
                     }
                 }
             }
 
-            if (bestRect == null) return false;
+            if (bestBox == null) return false;
+            var takenPlace = new BoundingBox(new Vector2(bestBox.MinX, bestBox.MinY), width, height);
+            ReturnedBounds = takenPlace;
 
-            // Размещаем в левый нижний угол
-            placement = new CustRectangle(bestRect.X, bestRect.Y, width, height);
-            detail.MoveDetail(bestRect.X, bestRect.Y);
+            AddNewFreeSpaces(takenPlace);
+            MergeRects();
 
-            // Обновляем список свободных областей
-            SplitFreeRects(placement);
+            FreeArea = 0;
+            foreach (var rect in FreeRects)
+                FreeArea += rect.Area;
+
             return true;
         }
 
-        private void SplitFreeRects(CustRectangle placedRect)
+        private void AddNewFreeSpaces(BoundingBox takenPlace)
         {
-            List<CustRectangle> newRects = new List<CustRectangle>();
+            var newRects = new List<BoundingBox>();
 
-            foreach (var freeRect in FreeRects)
+            foreach (var rect in FreeRects)
             {
-                if (!freeRect.Intersects(placedRect))
+                if (!rect.Intersects(takenPlace))
                 {
-                    newRects.Add(freeRect);
+                    newRects.Add(rect);
                     continue;
                 }
 
-                // Разделение по вертикали
-                if (placedRect.X > freeRect.X)
+                if (takenPlace.MinX > rect.MinX)
                 {
-                    newRects.Add(new CustRectangle(
-                        freeRect.X, freeRect.Y,
-                        placedRect.X - freeRect.X, freeRect.Height));
+                    newRects.Add(new BoundingBox(
+                        rect.MinX, rect.MaxY,
+                        takenPlace.MinX - rect.MinX, rect.Height));
                 }
 
-                if (placedRect.Right < freeRect.Right)
+                if (takenPlace.MaxX < rect.MaxX)
                 {
-                    newRects.Add(new CustRectangle(
-                        placedRect.Right, freeRect.Y,
-                        freeRect.Right - placedRect.Right, freeRect.Height));
+                    newRects.Add(new BoundingBox(
+                        takenPlace.MaxX, rect.MaxY,
+                        rect.MaxX - takenPlace.MaxX, rect.Height));
                 }
 
-                // Разделение по горизонтали
-                if (placedRect.Y > freeRect.Y)
+                if (takenPlace.MaxY > rect.MaxY)
                 {
-                    newRects.Add(new CustRectangle(
-                        freeRect.X, freeRect.Y,
-                        freeRect.Width, placedRect.Y - freeRect.Y));
+                    newRects.Add(new BoundingBox(
+                        rect.MinX, rect.MinY,
+                        rect.Width, takenPlace.MaxY - rect.MaxY));
                 }
 
-                if (placedRect.Bottom < freeRect.Bottom)
+                if (takenPlace.MinY < rect.MinY)
                 {
-                    newRects.Add(new CustRectangle(
-                        freeRect.X, placedRect.Bottom,
-                        freeRect.Width, freeRect.Bottom - placedRect.Bottom));
+                    newRects.Add(new BoundingBox(
+                        rect.MinX, takenPlace.MinY,
+                        rect.Width, rect.MinY - takenPlace.MinY));
                 }
             }
 
             FreeRects = newRects;
-            MergeFreeRects();
         }
 
-        private void MergeFreeRects()
+        private void MergeRects()
         {
-            // Удаляем полностью поглощённые прямоугольники
             FreeRects.RemoveAll(rect1 =>
-                FreeRects.Any(rect2 =>
-                    rect1 != rect2 &&
-                    rect2.X <= rect1.X &&
-                    rect2.Y <= rect1.Y &&
-                    rect2.Right >= rect1.Right &&
-                    rect2.Bottom >= rect1.Bottom));
-        }
-    }
-
-    public class CustRectangle
-    {
-        public double X { get; private set; }
-        public double Y { get; private set; }
-        public double Width { get; private set; }
-        public double Height { get; private set; }
-
-        public double Left { get; private set; }
-        public double Right { get; private set; }
-        public double Top { get; private set; }
-        public double Bottom { get; private set; }
-
-        public CustRectangle(double x, double y, double width, double height)
-        {
-            X = x;
-            Y = y;
-            Width = width;
-            Height = height;
-        }
-
-        public bool Intersects(CustRectangle other)
-        {
-            return X < other.X + other.Width &&
-                   X + Width > other.X &&
-                   Y < other.Y + other.Height &&
-                   Y + Height > other.Y;
+            FreeRects.Any(rect2 =>
+                rect1 != rect2 &&
+                rect2.MinX <= rect1.MinX &&
+                rect2.MinY <= rect1.MinY &&
+                rect2.MaxX >= rect1.MaxX &&
+                rect2.MaxY >= rect1.MinY));
         }
     }
 }

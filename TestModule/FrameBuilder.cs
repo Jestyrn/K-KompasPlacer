@@ -11,56 +11,33 @@ namespace TestModule
 {
     public class FrameBuilder
     {
-        private static int staticPading = 10;
-        private int pading = 10;
-        private int step = 50;
+        public double Capacity { get; private set; } = 0;
 
-        public double Area { get; private set; }
+        public BoundingBox Bounds { get; private set; } = new BoundingBox(0, 0, 0, 0);
+        private List<EntityObject> _frame;
+        public static double Pading {  get; private set; }
 
-        public double lastX {  get; private set; }
-        public double Width {  get; private set; }
-        public double Height {  get; private set; }
+        private static double _lastX = 0;
 
-        public BoundingBox BoundingBox { get; private set; }
-
-        public FrameBuilder(int pading)
+        public FrameBuilder(double pading = 0)
         {
-            this.pading = pading;
-            step = pading;
-            staticPading = pading;
+            Pading = pading;
+            _frame = new List<EntityObject>();
         }
 
-        public Block Construct(int width, int height)
+        public void CreateFrame(double width, double height)
         {
-            lastX = 0 + pading;
-            Area = width * height;
+            Bounds = new BoundingBox(_lastX, _lastX + width, 0, height);
 
-            Vector3 leftDown = new Vector3(lastX, 0, 0);
-            Vector3 rightDown = new Vector3(width + pading, 0, 0);
-            Vector3 rightUp = new Vector3(width + pading, height, 0);
-            Vector3 leftUp = new Vector3(lastX, height, 0);
+            _frame.Add(new Line(new Vector2(Bounds.MinX, Bounds.MinY), new Vector2(Bounds.MaxX, Bounds.MinY)));
+            _frame.Add(new Line(new Vector2(Bounds.MaxX, Bounds.MinY), new Vector2(Bounds.MaxX, Bounds.MaxY)));
+            _frame.Add(new Line(new Vector2(Bounds.MaxX, Bounds.MaxY), new Vector2(Bounds.MinX, Bounds.MaxY)));
+            _frame.Add(new Line(new Vector2(Bounds.MaxX, Bounds.MaxY), new Vector2(Bounds.MinX, Bounds.MinY)));
+            Capacity = width * height;
 
-            BoundingBox = new BoundingBox(leftDown.X, rightUp.X, leftDown.Y, rightUp.Y);
-
-            Line line1 = new Line(leftDown, rightDown);
-            Line line2 = new Line(rightDown, rightUp);
-            Line line3 = new Line(rightUp, leftUp);
-            Line line4 = new Line(leftUp, leftDown);
-
-            List<EntityObject> objs = new List<EntityObject>
-            {
-                line1,
-                line2,
-                line3,
-                line4
-            };
-
-            staticPading += step + step;
-            pading = staticPading;
-            Width = width;
-            Height = height;
-
-            return new Block($"Frame{pading / step}", objs);
+            _lastX += width;
         }
+
+        public void InsertCapacity(double newCapacity) => Capacity = newCapacity;
     }
 }
