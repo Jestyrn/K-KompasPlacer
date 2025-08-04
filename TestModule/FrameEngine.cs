@@ -12,6 +12,7 @@ namespace TestModule
     {
         private List<BoundingBox> FreeRects = new List<BoundingBox>();
         private BoundingBox ReturnedBounds;
+        private FrameBuilder FrameBuilder = new FrameBuilder(20);
 
         private double MinX = 0;
         private double MinY = 0;
@@ -52,14 +53,14 @@ namespace TestModule
             place = new BoundingBox(0,0,0,0);
             needRotate = false;
 
-            if (detail.Area > Area) return false;
+            if (detail.Area > FrameBuilder.Capacity) return false;
 
-            if (TryInsert(detail.Width, detail.Height))
+            if (TryInsert(detail, detail.Width, detail.Height))
             {
                 place = ReturnedBounds;
                 return true;
             }
-            else if(TryInsert(detail.Height, detail.Width))
+            else if(TryInsert(detail, detail.Height, detail.Width))
             {
                 place = ReturnedBounds;
                 needRotate = true;
@@ -70,7 +71,7 @@ namespace TestModule
             return false;
         }
 
-        private bool TryInsert(double width, double height)
+        private bool TryInsert(Detail detail, double width, double height)
         {
             double bestScore = int.MaxValue;
             BoundingBox bestBox = null;
@@ -95,6 +96,7 @@ namespace TestModule
             var takenPlace = new BoundingBox(new Vector2(bestBox.MinX, bestBox.MinY), width, height);
             ReturnedBounds = takenPlace;
 
+            FrameBuilder.AddNewDetail(detail, bestBox.MinX, bestBox.MinY);
             AddNewFreeSpaces(takenPlace);
             MergeRects();
 
