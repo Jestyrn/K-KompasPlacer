@@ -4,10 +4,6 @@ namespace TestModule
 {
     public class SetReady
     {
-        // открыть файл как тхт
-        // внести изменения Регекс
-        // сохранить и закрыть
-
         public static void Setup(string path)
         {
             var reg = new Regex(@"(\s?)(\d+)\s*(шт)");
