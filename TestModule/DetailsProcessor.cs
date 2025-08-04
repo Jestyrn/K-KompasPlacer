@@ -2,6 +2,7 @@
 using netDxf.Blocks;
 using netDxf.Collections;
 using netDxf.Entities;
+using netDxf.Tables;
 using Vector3 = netDxf.Vector3;
 
 namespace TestModule
@@ -36,7 +37,11 @@ namespace TestModule
 
     public class Detail : IComparable<Detail>
     {
+        private static int _id = 0;
+
         public List<EntityObject> Entities { get; private set; }
+        private Block Block { get; set; }
+        public Insert Insert { get; private set; }
         public Vector3 Center { get; private set; }
 
         public double Width { get; private set; }
@@ -59,11 +64,24 @@ namespace TestModule
             FindBestAngle();
         }
 
+        private void UpdateInsert()
+        {
+            Block = new Block($"D{_id}");
+            foreach (EntityObject obj in Entities)
+                Block.Entities.Add((EntityObject)obj.Clone());
+
+            Block.Layer = netDxf.Tables.Layer.Default;
+            Insert = new Insert(Block);
+
+            _id++;
+        }
+
         private void CompletePrepairs()
         {
             FindPoints();
             FindMinMax();
             FindGeometry();
+            UpdateInsert();
         }
 
         public void MoveDetail(double x, double y)
@@ -286,6 +304,27 @@ namespace TestModule
             Height = Math.Abs(MaxY - MinY);
         
             Area = Width * Height;
+        }
+
+        public BoundingBox(Vector2 leftX_upY, double width, double height)
+        {
+            MinX = leftX_upY.X;
+            MaxX = leftX_upY.X + width;
+            MinY = leftX_upY.Y;
+            MaxY = leftX_upY.Y + height;
+
+            Width = Math.Abs(MaxX - MinX);
+            Height = Math.Abs(MaxY - MinY);
+
+            Area = Width * Height;
+        }
+
+        public bool Intersects(BoundingBox other)
+        {
+            return MinX < other.MaxX &&
+                   MaxX > other.MinX &&
+                   MinY < other.MaxY &&
+                   MaxY > other.MinY;
         }
     }
 
