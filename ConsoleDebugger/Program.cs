@@ -4,15 +4,13 @@ using netDxf.Collections;
 using netDxf.Entities;
 using System.Runtime.CompilerServices;
 using TestModule;
-using TextInfo = TestModule.TextInfo;
 
 internal class Program
 {
     private static DxfDocument DXF = new DxfDocument();
-    private static List<TextInfo> Texts;
-    private static List<TextInfo> TextsInfo;
     private static List<Detail> Details = new List<Detail>();
     private static string Path = @"C:\Users\mrbug\OneDrive\Рабочий стол\Developers\K-Kompas\Kwork.dxf";
+    private static string PathSimple = @"C:\Users\mrbug\OneDrive\Рабочий стол\Developers\K-Kompas\SimpleKwork.dxf";
     private static string PathCheck = @"C:\Users\mrbug\OneDrive\Рабочий стол\Developers\K-Kompas\ForCheck.dxf";
 
     private static void Main(string[] args)
@@ -23,9 +21,7 @@ internal class Program
     private static void StartNewTest()
     {
         //SetReady.Setup(Path); // почистит от пробелов и лишних символов в Entities.Text
-        //TextsInfo = new List<TextInfo>(TextProcessor.GetCounterText(Path)); // парсинг текста (с шт)
-        //Texts = new List<TextInfo>(TextProcessor.GetText(Path)); // парсинг текста
-        Details = new List<Detail>(DetailsProcessor.GetAllDetails(PathCheck)); // парсинг деталей
+        Details = new List<Detail>(DetailsProcessor.GetAllDetails(PathSimple)); // парсинг деталей
         //Details = Details.OrderByDescending(p => p.Area) // сортировка деталей по увелечению
         //    .ThenByDescending(p => p.Area)
         //    .ThenBy(p => p.Entities.Count)
@@ -43,78 +39,41 @@ internal class Program
             }
         }
 
+        // Поворот широкой стороной
+        foreach (var detail in Details)
+            if (detail.Width < detail.Height)
+                detail.RotateDetail(90);
+
+        // Размещение в ряд
+        int lastx = -2000;
+        int step = 100;
+        foreach (var detail in Details)
+        {
+            detail.MoveDetail(lastx + step, -300);
+            lastx = (int)detail.Bounds.MaxX;
+        }
+
         // Добавление первых 200 элементов
-        for (int i = 0; i < 200; i++)
+        for (int i = 0; i < Details.Count; i++)
+        {
             DXF.Entities.Add(Details[i].Insert);
+            for (int j = 0; j < Details[i].BoundsDXF.Count; j++)
+            {
+                DXF.Entities.Add(Details[i].BoundsDXF[j]);
+            }
+        }
 
-        DXF.Save(PathCheck.Replace("ForCheck", "ForCheck-SavedBlocks"));
-
-        // --- //
-        /*
-         
-         * 1. Задать длину и ширину
-         * 2. Поставить их в "Соеденяющий модуль"
-         * 3. Получить Список "Элементов"
-         * 4. Записать Список в DXF
-         * 
-         * 
-         
-        */
-        // --- // 
+        DXF.Save(PathSimple);
 
 
-        //FrameBuilder builder = new FrameBuilder();
-        //double width, height;
-        //width = height = 20000000;
-        //builder.CreateFrame(width, height);
+        // проверка работы размещения
+        var controller = new FrameController(Details, 5000, 5000, 10);
+        List<Insert> ins = controller.Execute();
 
-        //FrameEngine engine = new FrameEngine(builder.Bounds);
+        DXF = new DxfDocument();
+        foreach (var item in ins)
+            DXF.Entities.Add((EntityObject)item.Clone());
 
-        //List<int> forRemove = new List<int>();
-        //BoundingBox neededPlace = new BoundingBox(0,0,0,0);
-
-        //bool createNewFrame = true;
-        //while (Details.Count != 0)
-        //{
-        //    foreach (var detail in Details)
-        //    {
-        //        if (engine.FreeArea < detail.Bounds.Area)
-        //        {
-        //            builder.CreateFrame(width, height);
-        //            engine.UpdateFrame(builder.Bounds);
-        //            break;
-        //        }
-
-        //        if (engine.TryPlaceDetail(detail, out bool needRotate, out neededPlace))
-        //        {
-        //            if (needRotate)
-        //            {
-        //                detail.RotateDetail(90);
-        //                detail.MoveDetail(neededPlace.MinX, neededPlace.MinY);
-        //            }
-        //            else
-        //            {
-        //                detail.MoveDetail(neededPlace.MinX, neededPlace.MinY);
-        //            }
-
-        //            forRemove.Add(Details.IndexOf(detail));
-        //        }
-        //    }
-
-        //    for (int i = 0; i < forRemove.Count; i++)
-        //    {
-        //        // check (dont remove if forRemove.Count == 0)
-        //        Details.RemoveAt(forRemove[i] - i);
-        //    }
-        //}
-
-        //DXF = new DxfDocument();
-
-        //foreach (var item in Details)
-        //{
-        //    DXF.Entities.Add(item.Insert);
-        //}
-
-        //DXF.Save(PathCheck.Replace("ForCheck", "Resul-WantToSee"));
+        DXF.Save(PathCheck.Replace("ForCheck", "ForCheck-Replace"));
     }
 }
