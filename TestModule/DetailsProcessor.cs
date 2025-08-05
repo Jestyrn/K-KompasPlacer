@@ -37,8 +37,10 @@ namespace TestModule
 
     public class Detail : IComparable<Detail>
     {
-        private static int _id = 0;
-
+        public static int ID { get; private set; } = 0;
+        public static string Name { get; private set; }
+        public bool NeedRotate = false;
+        
         public List<EntityObject> Entities { get; private set; }
         private Block Block { get; set; }
         public Insert Insert { get; private set; }
@@ -66,14 +68,14 @@ namespace TestModule
 
         private void UpdateInsert()
         {
-            Block = new Block($"D{_id}");
+            Name = $"Detail{ID}";
+
+            Block = new Block(Name);
             foreach (EntityObject obj in Entities)
                 Block.Entities.Add((EntityObject)obj.Clone());
 
-            Block.Layer = netDxf.Tables.Layer.Default;
             Insert = new Insert(Block);
-
-            _id++;
+            ID++;
         }
 
         private void CompletePrepairs()
@@ -130,7 +132,7 @@ namespace TestModule
         private void FindBestAngle()
         {
             double fullAngle = 360;
-            int step = 360;
+            int step = 720;
 
             // список <угол, площадь>
             Dictionary<double, double> anglArea = new Dictionary<double, double>();
@@ -325,6 +327,37 @@ namespace TestModule
                    MaxX > other.MinX &&
                    MinY < other.MaxY &&
                    MaxY > other.MinY;
+        }
+
+        public List<BoundingBox> Split(BoundingBox taken)
+        {
+            var result = new List<BoundingBox>();
+
+            // Верх
+            if (taken.MaxY < this.MaxY)
+                result.Add(new BoundingBox(
+                    new Vector2(this.MinX, taken.MaxY),
+                    this.Width, this.MaxY - taken.MaxY));
+
+            // Низ
+            if (taken.MinY > this.MinY)
+                result.Add(new BoundingBox(
+                    new Vector2(this.MinX, this.MinY),
+                    this.Width, taken.MinY - this.MinY));
+
+            // Лево
+            if (taken.MinX > this.MinX)
+                result.Add(new BoundingBox(
+                    new Vector2(this.MinX, this.MinY),
+                    taken.MinX - this.MinX, this.Height));
+
+            // Право
+            if (taken.MaxX < this.MaxX)
+                result.Add(new BoundingBox(
+                    new Vector2(taken.MaxX, this.MinY),
+                    this.MaxX - taken.MaxX, this.Height));
+
+            return result;
         }
     }
 
