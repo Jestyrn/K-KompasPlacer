@@ -42,7 +42,6 @@ namespace TestModule
                 {
                     Frame frame = package.Frame;
 
-                    // Площдь свободного места больше площади детали
                     if (frame.Capacity >= detail.Area)
                     {
                         Vector2 newPos = FindBestPosition(frame, detail, out placed);
@@ -69,35 +68,45 @@ namespace TestModule
 
                 if (!placed)
                 {
-                    if (framesPackages.Count != 0)
+                    if (Frame.Bounds.CanInsert(detail.Bounds))
                     {
-                        int index = (framesPackages.Count - 1) <= 1 ? 0 : framesPackages.Count - 1;
-
-                        var lastBox = framesPackages[index].Frame.BoundingBox;
-                        detail.MoveDetail(lastBox.MaxX + Pading, 0);
-
-                        framesPackages.Add(new FramePackage
+                        if (framesPackages.Count != 0)
                         {
-                            Frame = new Frame(new Vector2(lastBox.MaxX + Pading, 0), width, height),
-                            Details = new List<Detail> { detail }
-                        });
-                        framesPackages[index].Frame.Capacity -= detail.Area;
-                        framesPackages[index].Frame.FreeRects = UpdateFreeRects(framesPackages[index].Frame.FreeRects, detail.Bounds);
+                            int index = framesPackages.Count - 1;
+
+                            var lastBox = framesPackages[index].Frame.BoundingBox;
+                            detail.MoveDetail(lastBox.MaxX + Pading, 0);
+
+                            framesPackages.Add(new FramePackage
+                            {
+                                Frame = new Frame(new Vector2(lastBox.MaxX + Pading, 0), width, height),
+                                Details = new List<Detail> { detail }
+                            });
+                            framesPackages[index].Frame.Capacity -= detail.Area;
+                            framesPackages[index].Frame.FreeRects = UpdateFreeRects(framesPackages[index].Frame.FreeRects, detail.Bounds);
+                        }
+                        else
+                        {
+                            detail.MoveDetail(0,0);
+
+                            framesPackages.Add(new FramePackage
+                            {
+                                Frame = new Frame(new Vector2(0, 0), width, height),
+                                Details = new List<Detail> { detail }
+                            });
+                            framesPackages[0].Frame.Capacity -= detail.Area;
+                            framesPackages[0].Frame.FreeRects = UpdateFreeRects(framesPackages[0].Frame.FreeRects, detail.Bounds);
+                        }
+
+                        placed = true;
                     }
                     else
                     {
-                        detail.MoveDetail(0,0);
-
-                        framesPackages.Add(new FramePackage
-                        {
-                            Frame = new Frame(new Vector2(0, 0), width, height),
-                            Details = new List<Detail> { detail }
-                        });
-                        framesPackages[0].Frame.Capacity -= detail.Area;
-                        framesPackages[0].Frame.FreeRects = UpdateFreeRects(framesPackages[0].Frame.FreeRects, detail.Bounds);
+                        throw new Exception("Выбрана очень маленький размер\n" +
+                            "Name: Width, Height\n" +
+                            $"Frame: {Frame.Bounds.Width}, {Frame.Bounds.Height}\n" +
+                            $"Detail: {detail.Bounds.Width}, {detail.Bounds.Height}\n");
                     }
-
-                    placed = true;
                 }
             }
 
@@ -115,41 +124,52 @@ namespace TestModule
         private Vector2 FindBestPosition(Frame frame, Detail detail, out bool placed)
         {
             placed = false;
-            double bestScore = int.MaxValue;
+            double bestScore = double.MaxValue;
             BoundingBox bestBox = null;
-            bool validWidth, validHeight;
+            bool shouldRotate = false;
 
             foreach (var freePlace in frame.FreeRects)
             {
-                if (freePlace.Area >= detail.Area)
+                if (freePlace.Width >= detail.Width && freePlace.Height >= detail.Height)
                 {
-                    if ((freePlace.Width >= detail.Width) & (freePlace.Height >= detail.Height))
-                    {
-                        double score = Math.Min((freePlace.Width - detail.Width), (freePlace.Height - detail.Height));
-                        if (score < bestScore)
-                        {
-                            bestBox = freePlace;
-                            bestScore = score;
-                        }
-                    }
-                    else if ((freePlace.Width >= detail.Height) & (freePlace.Height >= detail.Width))
-                    {
-                        detail.RotateDetail(90);
+                    double gapWidth = freePlace.Width - detail.Width;
+                    double gapHeight = freePlace.Height - detail.Height;
 
-                        double score = Math.Min((freePlace.Width - detail.Width), (freePlace.Height - detail.Height));
-                        if (score < bestScore)
-                        {
-                            bestBox = freePlace;
-                            bestScore = score;
-                        }
+                    double score = Math.Min(gapWidth, gapHeight);
+
+                    if (score < bestScore)
+                    {
+                        bestScore = score;
+                        bestBox = freePlace;
+                        shouldRotate = false;
                     }
-                    continue;
+                }
+
+                if (freePlace.Width >= detail.Height && freePlace.Height >= detail.Width)
+                {
+                    double gapWidth = freePlace.Width - detail.Height;
+                    double gapHeight = freePlace.Height - detail.Width;
+
+                    double score = Math.Min(gapWidth, gapHeight);
+
+                    if (score < bestScore)
+                    {
+                        bestScore = score;
+                        bestBox = freePlace;
+                        shouldRotate = true;
+                    }
                 }
             }
-            if (bestBox == null) placed = false;
-            else placed = true;
 
-            return bestBox != null ? new Vector2(bestBox.MinX, bestBox.MaxY) : new Vector2();
+            if (bestBox != null)
+            {
+                if (shouldRotate)
+                    detail.RotateDetail(90);
+
+                return new Vector2(bestBox.MinX, bestBox.MinY);
+            }
+
+            return Vector2.Zero;
         }
 
         private List<BoundingBox> UpdateFreeRects(List<BoundingBox> freeRects, BoundingBox takenBox)
@@ -158,15 +178,15 @@ namespace TestModule
 
             foreach (var bounds in freeRects)
             {
-                if (bounds.Intersects(takenBox))
-                {
-                    result.Add(bounds);
-                }
-                else
+                if (takenBox.MinX == bounds.MinX && (takenBox.MaxY == bounds.MinY || takenBox.MinY == bounds.MinY))
                 {
                     result.Add(new BoundingBox(takenBox.MaxX, bounds.MaxX, bounds.MinY, takenBox.MinY));
                     result.Add(new BoundingBox(takenBox.MaxX, bounds.MaxX, takenBox.MinY, bounds.MaxY));
                     result.Add(new BoundingBox(bounds.MinX, takenBox.MaxX, takenBox.MinY, bounds.MaxY));
+                }
+                else
+                {
+                    result.Add(bounds);
                 }
             }
             return result;
@@ -176,6 +196,8 @@ namespace TestModule
     public class Frame
     {
         public static int Id { get; private set; } = 0;
+        public static BoundingBox Bounds { get; private set; }
+
 
         public BoundingBox BoundingBox { get; private set; }
         public Insert Insert { get; private set; }
@@ -213,6 +235,7 @@ namespace TestModule
         private void CreateBounds()
         {
             BoundingBox = new BoundingBox(Axle, Width, Height);
+            Bounds = BoundingBox;
 
             FreeRects = new List<BoundingBox> { BoundingBox };
             Capacity = BoundingBox.Area;

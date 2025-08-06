@@ -344,6 +344,12 @@ namespace TestModule
                     MaxY <= other.MaxY;
         }
 
+        public bool CanInsert(BoundingBox whoInserted)
+        {
+            return  Width >= whoInserted.Width &
+                    Height >= whoInserted.Height;
+        }
+
         public List<BoundingBox> Split(BoundingBox taken)
         {
             var result = new List<BoundingBox>();
