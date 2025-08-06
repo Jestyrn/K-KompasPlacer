@@ -165,6 +165,7 @@ namespace TestModule
             {
                 if (shouldRotate)
                     detail.RotateDetail(90);
+                placed = true;
 
                 return new Vector2(bestBox.MinX, bestBox.MinY);
             }
@@ -180,9 +181,25 @@ namespace TestModule
             {
                 if (takenBox.MinX == bounds.MinX && (takenBox.MaxY == bounds.MinY || takenBox.MinY == bounds.MinY))
                 {
-                    result.Add(new BoundingBox(takenBox.MaxX, bounds.MaxX, bounds.MinY, takenBox.MinY));
-                    result.Add(new BoundingBox(takenBox.MaxX, bounds.MaxX, takenBox.MinY, bounds.MaxY));
-                    result.Add(new BoundingBox(bounds.MinX, takenBox.MaxX, takenBox.MinY, bounds.MaxY));
+                    double scopeWidth = takenBox.Width / takenBox.Height;
+                    double scopeHeight = takenBox.Height / takenBox.Width;
+
+                    if (scopeWidth > 1.5)
+                    {
+                        result.Add(new BoundingBox(bounds.MinX, takenBox.MaxX, takenBox.MinY, bounds.MaxY));
+                        result.Add(new BoundingBox(takenBox.MaxX, bounds.MaxX, bounds.MinY, bounds.MaxY));
+                    }
+                    else if (scopeHeight > 1.5)
+                    {
+                        result.Add(new BoundingBox(takenBox.MinX, bounds.MaxX, bounds.MinY, takenBox.MinY));
+                        result.Add(new BoundingBox(bounds.MinX, bounds.MaxX, takenBox.MinY, bounds.MaxY));
+                    }
+                    else
+                    {
+                        result.Add(new BoundingBox(takenBox.MaxX, bounds.MaxX, bounds.MinY, takenBox.MinY));
+                        result.Add(new BoundingBox(takenBox.MaxX, bounds.MaxX, takenBox.MinY, bounds.MaxY));
+                        result.Add(new BoundingBox(bounds.MinX, takenBox.MaxX, takenBox.MinY, bounds.MaxY));
+                    }
                 }
                 else
                 {
