@@ -4,6 +4,7 @@ using netDxf.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,7 +12,7 @@ namespace TestModule
 {
     public class FrameController
     {
-        private List<FramePackage> frames;
+        private List<FramePackage> framesPackages;
         private List<Insert> Result;
         private List<Detail> details;
 
@@ -23,99 +24,186 @@ namespace TestModule
         public FrameController(List<Detail> details, double width, double height, int pading = 0)
         {
             this.details = details;
-            frames = new List<FramePackage>();
+            framesPackages = new List<FramePackage>();
             this.width = width;
             this.height = height;
 
             Pading = pading;
         }
 
-        public List<Insert> Execute()
+        public List<Insert> TakeFilled()
         {
             Result = new List<Insert>();
+            bool placed = false;
 
             foreach (var detail in details)
             {
-                bool placed = false;
-
-                // Пробуем вставить в существующие фреймы
-                foreach (var framePkg in frames)
+                // Проходимся по фреймам
+                foreach (var package in framesPackages)
                 {
-                    var calc = new CalculatePosition(framePkg.Frame.FreeRects, detail);
-                    var fit = calc.FindBestFit();
+                    Frame frame = package.Frame;
 
-                    if (fit.Success)
+                    // Площдь свободного места больше площади детали
+                    if (frame.Capacity >= detail.Area)
                     {
-                        if (fit.WillRotate)
-                            detail.RotateDetail(90);
+                        Vector2 newPos = FindBestPosition(frame, detail, out placed);
+                        if (frame.BoundingBox.Contains(detail.Bounds))
+                        {
+                            if (placed)
+                            {
+                                detail.MoveDetail(newPos.X, newPos.Y);
 
-                        detail.MoveDetail(fit.Position.X, fit.Position.Y);
-                        framePkg.Details.Add(detail);
+                                int index = framesPackages.IndexOf(package);
+                                framesPackages[index].Details.Add(detail);
 
-                        framePkg.Frame.FreeRects = UpdateFreeRects(framePkg.Frame.FreeRects, fit.TakenBox);
-                        placed = true;
-                        break;
+                                framesPackages[index].Frame.Capacity -= detail.Area;
+                                framesPackages[index].Frame.FreeRects = UpdateFreeRects(framesPackages[index].Frame.FreeRects, detail.Bounds);
+
+                                continue;
+                            }
+                        }
+                        else
+                        {
+                            placed = false;
+                        }
+                    }
+                    else
+                    {
+                        placed = false;
                     }
                 }
 
-                // Если не влезло — создаем новый фрейм
+                // Пытаемся вставить
                 if (!placed)
                 {
-                    var newFrame = new Framer(new Vector2(0, 0), width, height);
-                    var newPkg = new FramePackage
+                    if (framesPackages.Count != 0)
                     {
-                        Frame = newFrame,
-                        Details = new List<Detail>()
-                    };
+                        int index = (framesPackages.Count - 1) <= 0 ? 0 : framesPackages.Count - 1;
 
-                    var calc = new CalculatePosition(newFrame.FreeRects, detail);
-                    var fit = calc.FindBestFit();
+                        var lastBox = framesPackages[index].Frame.BoundingBox;
+                        detail.MoveDetail(lastBox.MaxX + Pading, 0);
 
-                    if (!fit.Success)
-                        throw new Exception("Деталь не помещается даже в пустую рамку.");
+                        framesPackages.Add(new FramePackage
+                        {
+                            Frame = new Frame(new Vector2(lastBox.MaxX + Pading, 0), width, height),
+                            Details = new List<Detail> { detail }
+                        });
+                        framesPackages[index].Frame.Capacity -= detail.Area;
+                        framesPackages[index].Frame.FreeRects = UpdateFreeRects(framesPackages[index].Frame.FreeRects, detail.Bounds);
+                    }
+                    else
+                    {
+                        detail.MoveDetail(0,0);
 
-                    if (fit.WillRotate)
-                        detail.RotateDetail(90);
-
-                    detail.MoveDetail(fit.Position.X, fit.Position.Y);
-                    newPkg.Details.Add(detail);
-                    newFrame.FreeRects = UpdateFreeRects(newFrame.FreeRects, fit.TakenBox);
-
-                    frames.Add(newPkg);
+                        framesPackages.Add(new FramePackage
+                        {
+                            Frame = new Frame(new Vector2(0, 0), width, height),
+                            Details = new List<Detail> { detail }
+                        });
+                        framesPackages[0].Frame.Capacity -= detail.Area;
+                        framesPackages[0].Frame.FreeRects = UpdateFreeRects(framesPackages[0].Frame.FreeRects, detail.Bounds);
+                    }
                 }
             }
 
-            // Сборка финального результата
-            foreach (var pkg in frames)
+            foreach (var package in framesPackages)
             {
-                Result.Add(pkg.Frame.Insert);
-                foreach (var detail in pkg.Details)
+                Result.Add(package.Frame.Insert);
+                foreach (var detail in package.Details)
                     Result.Add(detail.Insert);
             }
 
             return Result;
         }
 
-        private List<BoundingBox> UpdateFreeRects(List<BoundingBox> freeRects, BoundingBox taken)
+        private Vector2 FindBestPosition(Frame frame, Detail detail, out bool placed)
         {
-            var updated = new List<BoundingBox>();
+            placed = false;
+            double bestScore = int.MaxValue;
+            BoundingBox bestBox = null;
 
-            foreach (var rect in freeRects)
+            foreach (var freePlace in frame.FreeRects)
             {
-                if (!rect.Intersects(taken))
+                if (freePlace.Area > detail.Area)
                 {
-                    updated.Add(rect);
+                    if ((freePlace.Width >= detail.Width) & (freePlace.Height >= detail.Height))
+                    {
+                        double score = Math.Min((freePlace.Width - detail.Width), (freePlace.Height - detail.Height));
+                        if (score < bestScore)
+                        {
+                            bestBox = freePlace;
+                            bestScore = score;
+                        }
+                    }
+                    else if ((freePlace.Width >= detail.Height) & (freePlace.Height >= detail.Width))
+                    {
+                        detail.RotateDetail(90);
+
+                        double score = Math.Min((freePlace.Width - detail.Width), (freePlace.Height - detail.Height));
+                        if (score < bestScore)
+                        {
+                            bestBox = freePlace;
+                            bestScore = score;
+                        }
+                    }
                     continue;
                 }
-
-                updated.AddRange(rect.Split(taken));
             }
+            if (bestBox == null) placed = false;
+            else placed = true;
 
-            return updated;
+            return bestBox != null ? new Vector2(bestBox.MinX, bestBox.MinY) : new Vector2();
+        }
+
+        private List<BoundingBox> UpdateFreeRects(List<BoundingBox> freeRects, BoundingBox takenBox)
+        {
+            var result = new List<BoundingBox>();
+
+            foreach (var bounds in freeRects)
+            {
+                if (bounds.Intersects(takenBox))
+                {
+                    result.Add(bounds);
+                }
+                else
+                {
+                    Vector2 cutPoint = new Vector2(takenBox.MaxX, takenBox.MinY);
+                    double newWidth, newHeight;
+
+                    newWidth = bounds.Width - takenBox.Width;
+                    newHeight = bounds.Height - takenBox.Height;
+
+                    if ((newHeight / newWidth) >= 2)
+                    {
+                        // Высота овер большая
+                        // По горизонтали
+                        result.Add(new BoundingBox(takenBox.MaxX, bounds.MaxX, bounds.MinY, takenBox.MinY));
+                        result.Add(new BoundingBox(bounds.MinX, bounds.MaxX, takenBox.MinY, bounds.MaxY));
+                    }
+                    else if ((newWidth / newHeight) >= 2)
+                    {
+                        // Ширина овер большая
+                        // По вертикали
+                        // л н огрызок
+                        // п огромный
+                        result.Add(new BoundingBox(bounds.MinX, takenBox.MaxX, takenBox.MinY, bounds.MaxY));
+                        result.Add(new BoundingBox(takenBox.MaxX, bounds.MaxX, bounds.MinY, bounds.MaxY));
+                    }
+                    else
+                    {
+                        // Нормик
+                        // Оба
+                        result.Add(new BoundingBox(takenBox.MaxX, bounds.MaxX, bounds.MinY, takenBox.MinY));
+                        result.Add(new BoundingBox(takenBox.MaxX, bounds.MaxX, takenBox.MinY, bounds.MaxY));
+                        result.Add(new BoundingBox(bounds.MinX, takenBox.MaxX, takenBox.MinY, bounds.MaxY));
+                    }
+                }
+            }
+            return result;
         }
     }
 
-    public class Framer
+    public class Frame
     {
         public static int Id { get; private set; } = 0;
 
@@ -123,13 +211,13 @@ namespace TestModule
         public Insert Insert { get; private set; }
         public List<EntityObject> Entities { get; private set; }
         public List<BoundingBox> FreeRects { get; set; }
-        public double Capacity { get; private set; }
+        public double Capacity { get; set; }
 
         private Vector2 Axle;
         private double Width;
         private double Height;
 
-        public Framer(Vector2 axle, double width, double height)
+        public Frame(Vector2 axle, double width, double height)
         {
             Axle = axle;
             Width = width;
@@ -155,110 +243,20 @@ namespace TestModule
         private void CreateBounds()
         {
             BoundingBox = new BoundingBox(Axle, Width, Height);
+
             FreeRects = new List<BoundingBox> { BoundingBox };
             Capacity = BoundingBox.Area;
         }
     }
 
-    public class CalculatePosition
-    {
-        private List<BoundingBox> FreePlaces;
-        private Detail Detail;
-
-        public CalculatePosition(List<BoundingBox> freePlaces, Detail detail)
-        {
-            FreePlaces = freePlaces.OrderByDescending(x => x.Area).ToList();
-            Detail = detail;
-        }
-
-        public bool TryFound(out bool willRotate, out Vector2 position)
-        {
-            willRotate = false;
-
-            if (CheckDetails(out position))
-            {
-                return true;
-            }
-            else if (CheckDetails(out position, true))
-            {
-                willRotate = true;
-                return true;
-            }
-
-            return false;
-        }
-
-        private bool CheckDetails(out Vector2 newPos, bool rotate = false)
-        {
-            if (rotate) Detail.RotateDetail(90);
-            newPos = new Vector2(Detail.Bounds.MinX, Detail.Bounds.MinY);
-
-            double bestScore = int.MaxValue;
-            BoundingBox bestBox = null;
-
-            foreach (var place in FreePlaces)
-            {
-                if (place.Width >= Detail.Width & place.Height >= Detail.Height)
-                {
-                    double leftoverHoriz = place.Width - Detail.Width;
-                    double leftoverVert = place.Height - Detail.Height;
-                    double score = Math.Min(leftoverHoriz, leftoverVert);
-
-                    if (score < bestScore)
-                    {
-                        bestScore = score;
-                        bestBox = place;
-                    }
-                }
-            }
-
-            if (bestBox == null) return false;
-            var takenPlace = new BoundingBox(new Vector2(bestBox.MinX, bestBox.MinY), Detail.Width, Detail.Height);
-
-            // Записать
-            // Порезать
-            // Убрать остатки
-
-            return true;
-        }
-
-        public PlacementResult FindBestFit()
-        {
-            var result = new PlacementResult();
-
-            if (CheckDetails(out Vector2 pos))
-            {
-                result.Success = true;
-                result.Position = pos;
-                result.WillRotate = false;
-                result.TakenBox = new BoundingBox(pos, Detail.Width, Detail.Height);
-                return result;
-            }
-            else if (CheckDetails(out pos, true))
-            {
-                result.Success = true;
-                result.Position = pos;
-                result.WillRotate = true;
-                result.TakenBox = new BoundingBox(pos, Detail.Width, Detail.Height);
-                return result;
-            }
-
-            result.Success = false;
-            return result;
-        }
-    }
-
-    public class PlacementResult
-    {
-        public bool Success { get; set; }
-        public Vector2 Position { get; set; }
-        public bool WillRotate { get; set; }
-        public BoundingBox TakenBox { get; set; }
-    }
-
     public class FramePackage
     {
-        public Framer Frame;
+        public Frame Frame;
         public List<Detail> Details;
+
+        public FramePackage()
+        {
+            Details = new List<Detail>();
+        }
     }
 }
