@@ -283,6 +283,12 @@ namespace TestModule
         }
     }
 
+    public class SimpleDetail
+    {
+        public string DetailName;
+        public Vector2 NewCoorinats;
+    }
+
     public class BoundingBox
     {
         public double MinX { get; }
@@ -313,7 +319,7 @@ namespace TestModule
             MinX = leftX_upY.X;
             MaxX = leftX_upY.X + width;
             MinY = leftX_upY.Y;
-            MaxY = leftX_upY.Y + height;
+            MaxY = leftX_upY.Y - height;
 
             Width = Math.Abs(MaxX - MinX);
             Height = Math.Abs(MaxY - MinY);
@@ -323,10 +329,19 @@ namespace TestModule
 
         public bool Intersects(BoundingBox other)
         {
+            // Прямоугольники НЕ пересекаются?
             return MinX < other.MaxX &&
                    MaxX > other.MinX &&
                    MinY < other.MaxY &&
                    MaxY > other.MinY;
+        }
+
+        public bool Contains(BoundingBox other)
+        {
+            return  MinX <= other.MinX &
+                    MaxX >= other.MaxX &
+                    MinY >= other.MinY &
+                    MaxY <= other.MaxY;
         }
 
         public List<BoundingBox> Split(BoundingBox taken)
@@ -359,12 +374,5 @@ namespace TestModule
 
             return result;
         }
-    }
-
-    public class AreaInfo
-    {
-        public double Area { get; set; }
-        public int AreaInt { get; set; }
-        public int Angle { get; set; }
     }
 }
