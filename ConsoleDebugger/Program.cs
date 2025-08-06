@@ -67,7 +67,7 @@ internal class Program
 
 
         // проверка работы размещения
-        var controller = new FrameController(Details, 2000, 2000, 500);
+        var controller = new FrameController(Details, 1000, 1000, 1000);
         List<Insert> ins = controller.TakeFilled();
 
         DXF = new DxfDocument();

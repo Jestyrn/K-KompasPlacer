@@ -38,7 +38,6 @@ namespace TestModule
 
             foreach (var detail in details)
             {
-                // Проходимся по фреймам
                 foreach (var package in framesPackages)
                 {
                     Frame frame = package.Frame;
@@ -47,24 +46,19 @@ namespace TestModule
                     if (frame.Capacity >= detail.Area)
                     {
                         Vector2 newPos = FindBestPosition(frame, detail, out placed);
-                        if (frame.BoundingBox.Contains(detail.Bounds))
+
+                        if (placed)
                         {
-                            if (placed)
-                            {
-                                detail.MoveDetail(newPos.X, newPos.Y);
+                            detail.MoveDetail(newPos.X, newPos.Y);
 
-                                int index = framesPackages.IndexOf(package);
-                                framesPackages[index].Details.Add(detail);
+                            int index = framesPackages.IndexOf(package);
+                            framesPackages[index].Details.Add(detail);
 
-                                framesPackages[index].Frame.Capacity -= detail.Area;
-                                framesPackages[index].Frame.FreeRects = UpdateFreeRects(framesPackages[index].Frame.FreeRects, detail.Bounds);
+                            framesPackages[index].Frame.Capacity -= detail.Area;
+                            framesPackages[index].Frame.FreeRects = UpdateFreeRects(framesPackages[index].Frame.FreeRects, detail.Bounds);
+                            placed = true;
 
-                                continue;
-                            }
-                        }
-                        else
-                        {
-                            placed = false;
+                            continue;
                         }
                     }
                     else
@@ -73,12 +67,11 @@ namespace TestModule
                     }
                 }
 
-                // Пытаемся вставить
                 if (!placed)
                 {
                     if (framesPackages.Count != 0)
                     {
-                        int index = (framesPackages.Count - 1) <= 0 ? 0 : framesPackages.Count - 1;
+                        int index = (framesPackages.Count - 1) <= 1 ? 0 : framesPackages.Count - 1;
 
                         var lastBox = framesPackages[index].Frame.BoundingBox;
                         detail.MoveDetail(lastBox.MaxX + Pading, 0);
@@ -103,6 +96,8 @@ namespace TestModule
                         framesPackages[0].Frame.Capacity -= detail.Area;
                         framesPackages[0].Frame.FreeRects = UpdateFreeRects(framesPackages[0].Frame.FreeRects, detail.Bounds);
                     }
+
+                    placed = true;
                 }
             }
 
@@ -113,6 +108,7 @@ namespace TestModule
                     Result.Add(detail.Insert);
             }
 
+            framesPackages.Clear();
             return Result;
         }
 
@@ -121,10 +117,11 @@ namespace TestModule
             placed = false;
             double bestScore = int.MaxValue;
             BoundingBox bestBox = null;
+            bool validWidth, validHeight;
 
             foreach (var freePlace in frame.FreeRects)
             {
-                if (freePlace.Area > detail.Area)
+                if (freePlace.Area >= detail.Area)
                 {
                     if ((freePlace.Width >= detail.Width) & (freePlace.Height >= detail.Height))
                     {
@@ -152,7 +149,7 @@ namespace TestModule
             if (bestBox == null) placed = false;
             else placed = true;
 
-            return bestBox != null ? new Vector2(bestBox.MinX, bestBox.MinY) : new Vector2();
+            return bestBox != null ? new Vector2(bestBox.MinX, bestBox.MaxY) : new Vector2();
         }
 
         private List<BoundingBox> UpdateFreeRects(List<BoundingBox> freeRects, BoundingBox takenBox)
@@ -167,36 +164,9 @@ namespace TestModule
                 }
                 else
                 {
-                    Vector2 cutPoint = new Vector2(takenBox.MaxX, takenBox.MinY);
-                    double newWidth, newHeight;
-
-                    newWidth = bounds.Width - takenBox.Width;
-                    newHeight = bounds.Height - takenBox.Height;
-
-                    if ((newHeight / newWidth) >= 2)
-                    {
-                        // Высота овер большая
-                        // По горизонтали
-                        result.Add(new BoundingBox(takenBox.MaxX, bounds.MaxX, bounds.MinY, takenBox.MinY));
-                        result.Add(new BoundingBox(bounds.MinX, bounds.MaxX, takenBox.MinY, bounds.MaxY));
-                    }
-                    else if ((newWidth / newHeight) >= 2)
-                    {
-                        // Ширина овер большая
-                        // По вертикали
-                        // л н огрызок
-                        // п огромный
-                        result.Add(new BoundingBox(bounds.MinX, takenBox.MaxX, takenBox.MinY, bounds.MaxY));
-                        result.Add(new BoundingBox(takenBox.MaxX, bounds.MaxX, bounds.MinY, bounds.MaxY));
-                    }
-                    else
-                    {
-                        // Нормик
-                        // Оба
-                        result.Add(new BoundingBox(takenBox.MaxX, bounds.MaxX, bounds.MinY, takenBox.MinY));
-                        result.Add(new BoundingBox(takenBox.MaxX, bounds.MaxX, takenBox.MinY, bounds.MaxY));
-                        result.Add(new BoundingBox(bounds.MinX, takenBox.MaxX, takenBox.MinY, bounds.MaxY));
-                    }
+                    result.Add(new BoundingBox(takenBox.MaxX, bounds.MaxX, bounds.MinY, takenBox.MinY));
+                    result.Add(new BoundingBox(takenBox.MaxX, bounds.MaxX, takenBox.MinY, bounds.MaxY));
+                    result.Add(new BoundingBox(bounds.MinX, takenBox.MaxX, takenBox.MinY, bounds.MaxY));
                 }
             }
             return result;
