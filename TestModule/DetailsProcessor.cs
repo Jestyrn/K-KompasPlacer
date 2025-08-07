@@ -309,10 +309,10 @@ namespace TestModule
 
         public BoundingBox(double minX, double maxX, double minY, double maxY)
         {
-            MinX = minX;
-            MaxX = maxX;
-            MinY = minY;
-            MaxY = maxY;
+            MinX = Math.Min(minX, maxX);
+            MaxX = Math.Max(minX, maxX);
+            MinY = Math.Max(minY, maxY);
+            MaxY = Math.Min(minY, maxY);
 
             Width = Math.Abs(MaxX - MinX);
             Height = Math.Abs(MaxY - MinY);

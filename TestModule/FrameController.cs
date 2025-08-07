@@ -34,122 +34,167 @@ namespace TestModule
         public List<Insert> TakeFilled()
         {
             Result = new List<Insert>();
-            bool placed = false;
 
             foreach (var detail in details)
             {
+                bool detailPlaced = false;
+
+                // Пытаемся разместить в существующих фреймах
                 foreach (var package in framesPackages)
                 {
-                    Frame frame = package.Frame;
+                    var frame = package.Frame;
 
                     bool canInsert = frame.FreeRects.Any(free =>
-                    (free.Width >= detail.Width && free.Height >= detail.Height) ||
-                    (free.Width >= detail.Height && free.Height >= detail.Width));
+                        (free.Width >= detail.Width && free.Height >= detail.Height) ||
+                        (free.Width >= detail.Height && free.Height >= detail.Width));
 
-                    // canInsert = frame.Capacity >= detail.Bounds.Area;
-
-                    if (canInsert)
+                    if (!canInsert)
                     {
-                        Vector2 newPos = FindBestPosition(frame, detail, out placed);
-
-                        if (placed)
-                        {
-                            detail.MoveDetail(newPos.X, newPos.Y);
-
-                            int index = framesPackages.IndexOf(package);
-                            framesPackages[index].Details.Add(detail);
-
-                            framesPackages[index].Frame.Capacity -= detail.Area;
-                            framesPackages[index].Frame.FreeRects = UpdateFreeRects(framesPackages[index].Frame.FreeRects, detail.Bounds);
-                            placed = true;
-
-                            continue;
-                        }
+                        frame.FreeRects = MergeAdjacentRects(RestoreFreeRects(package));
+                        continue;
                     }
-                    else
-                    {
-                        placed = false;
-                    }
+
+                    Vector2 newPos = FindBestPosition(frame, detail, out bool foundPosition);
+                    if (!foundPosition) continue;
+
+                    PlaceDetail(package, detail, newPos);
+                    detailPlaced = true;
+                    break;
                 }
 
-                if (!placed)
+                // Если не нашли место — создаём новый фрейм
+                if (!detailPlaced)
                 {
-                    if (Frame.Bounds.CanInsert(detail.Bounds))
-                    {
-                        if (framesPackages.Count != 0)
-                        {
-                            int index = framesPackages.Count - 1;
+                    if (!Frame.Bounds.CanInsert(detail.Bounds))
+                        throw new Exception($"Выбран слишком маленький размер\n" +
+                                            $"Frame: {Frame.Bounds.Width}, {Frame.Bounds.Height}\n" +
+                                            $"Detail: {detail.Bounds.Width}, {detail.Bounds.Height}");
 
-                            var lastBox = framesPackages[index].Frame.BoundingBox;
-                            detail.MoveDetail(lastBox.MaxX + Pading, 0);
-
-                            framesPackages.Add(new FramePackage
-                            {
-                                Frame = new Frame(new Vector2(lastBox.MaxX + Pading, 0), width, height),
-                                Details = new List<Detail> { detail }
-                            });
-                            framesPackages[index+1].Frame.Capacity -= detail.Area;
-                            framesPackages[index+1].Frame.FreeRects = UpdateFreeRects(framesPackages[index + 1].Frame.FreeRects, detail.Bounds);
-
-                            framesPackages[index].Frame.FreeRects = RestoreFreeRects(framesPackages[index]);
-                        }
-                        else
-                        {
-                            detail.MoveDetail(0,0);
-
-                            framesPackages.Add(new FramePackage
-                            {
-                                Frame = new Frame(new Vector2(0, 0), width, height),
-                                Details = new List<Detail> { detail }
-                            });
-                            framesPackages[0].Frame.Capacity -= detail.Area;
-                            framesPackages[0].Frame.FreeRects = UpdateFreeRects(framesPackages[0].Frame.FreeRects, detail.Bounds);
-                        }
-
-                        placed = true;
-                    }
-                    else
-                    {
-                        throw new Exception("Выбрана очень маленький размер\n" +
-                            "Name: Width, Height\n" +
-                            $"Frame: {Frame.Bounds.Width}, {Frame.Bounds.Height}\n" +
-                            $"Detail: {detail.Bounds.Width}, {detail.Bounds.Height}\n");
-                    }
+                    AddNewFrameWithDetail(detail);
                 }
             }
 
+            // Формируем результат
             foreach (var package in framesPackages)
             {
                 Result.Add(package.Frame.Insert);
-                foreach (var detail in package.Details)
-                    Result.Add(detail.Insert);
+                Result.AddRange(package.Details.Select(d => d.Insert));
             }
 
             framesPackages.Clear();
             return Result;
         }
 
+        private void PlaceDetail(FramePackage package, Detail detail, Vector2 position)
+        {
+            detail.MoveDetail(position.X, position.Y);
+            package.Details.Add(detail);
+            package.Frame.Capacity -= detail.Area;
+            package.Frame.FreeRects = UpdateFreeRects(package.Frame.FreeRects, detail.Bounds);
+        }
+
+        private void AddNewFrameWithDetail(Detail detail)
+        {
+            Vector2 pos = framesPackages.Count == 0
+                ? new Vector2(0, 0)
+                : new Vector2(framesPackages.Last().Frame.BoundingBox.MaxX + Pading, 0);
+
+            detail.MoveDetail(pos.X, pos.Y);
+
+            var newPackage = new FramePackage
+            {
+                Frame = new Frame(pos, width, height),
+                Details = new List<Detail> { detail }
+            };
+
+            newPackage.Frame.Capacity -= detail.Area;
+            newPackage.Frame.FreeRects = UpdateFreeRects(newPackage.Frame.FreeRects, detail.Bounds);
+
+            framesPackages.Add(newPackage);
+        }
+
         private List<BoundingBox> RestoreFreeRects(FramePackage framePackage)
         {
-            List<Detail> details = framePackage.Details;
-            List<BoundingBox> freeRects = framePackage.Frame.FreeRects;
-            List<BoundingBox> result = new List<BoundingBox>();
+            var result = new List<BoundingBox>();
+            var boxes = framePackage.Frame.FreeRects;
+            var main = framePackage.Frame.BoundingBox;
 
-            double maxX, maxY;
-            maxX = int.MinValue;
-            maxY = int.MaxValue;
+            double maxY = framePackage.Details.Min(d => d.Bounds.MaxY);
+            double minY = 0;
+            double maxX = framePackage.Details.Max(d => d.Bounds.MaxX);
+            double minX = framePackage.Details.Min(d => d.Bounds.MinX);
 
-            // 1. Найти максимально занятую площадь(по всем фигурам)
-            // 2. Найти свободные части(высота детали, длина от детали до конца)
-            // 3. Сортировать по Y
-            // 4. Посмотреть на полученные фигуры
-            // -- Есть пересечения?
-            // --- Сверху - обрезать по X (левая + пв + пн)
-            // ---- Обрезать по Y (левая + пв + пн)
-            // ---- Обрезать по X (избавиться от лв)
-            // 5. Объеденить все что можно (по Y) и избавиться от неактуальных
+            BoundingBox bigBox = new BoundingBox(minX, maxX, minY, maxY);
+
+            result.Add(new BoundingBox(bigBox.MaxX, main.MaxX, main.MinY, main.MaxY));
+            result.Add(new BoundingBox(main.MinX, main.MaxX, bigBox.MaxY, main.MaxY));
 
             return result;
+        }
+
+        private List<BoundingBox> MergeAdjacentRects(List<BoundingBox> rects)
+        {
+            bool merged;
+            var result = new List<BoundingBox>(rects);
+
+            do
+            {
+                merged = false;
+                for (int i = 0; i < result.Count; i++)
+                {
+                    for (int j = i + 1; j < result.Count; j++)
+                    {
+                        if (TryMergeRects(result[i], result[j], out var mergedRect))
+                        {
+                            result.RemoveAt(j);
+                            result.RemoveAt(i);
+                            result.Add(mergedRect);
+                            merged = true;
+                            break;
+                        }
+                    }
+                    if (merged) break;
+                }
+            } while (merged);
+
+            return result;
+        }
+
+        private bool TryMergeRects(BoundingBox a, BoundingBox b, out BoundingBox merged)
+        {
+            merged = null;
+
+            // Вертикальное объединение
+            if (a.MinX == b.MinX && a.MaxX == b.MaxX)
+            {
+                if (a.MaxY == b.MinY) // a над b
+                {
+                    merged = new BoundingBox(a.MinX, a.MaxX, a.MinY, b.MaxY);
+                    return true;
+                }
+                if (a.MinY == b.MaxY) // a под b
+                {
+                    merged = new BoundingBox(b.MinX, b.MaxX, b.MinY, a.MaxY);
+                    return true;
+                }
+            }
+
+            // Горизонтальное объединение
+            if (a.MinY == b.MinY && a.MaxY == b.MaxY)
+            {
+                if (a.MaxX == b.MinX) // a слева от b
+                {
+                    merged = new BoundingBox(a.MinX, b.MaxX, a.MinY, a.MaxY);
+                    return true;
+                }
+                if (a.MinX == b.MaxX) // a справа от b
+                {
+                    merged = new BoundingBox(b.MinX, a.MaxX, b.MinY, b.MaxY);
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private Vector2 FindBestPosition(Frame frame, Detail detail, out bool placed)
