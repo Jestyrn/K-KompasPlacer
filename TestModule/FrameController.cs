@@ -91,7 +91,7 @@ namespace TestModule
                             framesPackages[index+1].Frame.Capacity -= detail.Area;
                             framesPackages[index+1].Frame.FreeRects = UpdateFreeRects(framesPackages[index + 1].Frame.FreeRects, detail.Bounds);
 
-                            // framesPackages[index].Frame.FreeRects = RestoreFreeRects(framesPackages[index]);
+                            framesPackages[index].Frame.FreeRects = RestoreFreeRects(framesPackages[index]);
                         }
                         else
                         {
@@ -131,9 +131,25 @@ namespace TestModule
 
         private List<BoundingBox> RestoreFreeRects(FramePackage framePackage)
         {
-            // Просмотр имеющихся FreeRects
-            // Обновление FreeRects
-            // Перезапись FreeRects
+            List<Detail> details = framePackage.Details;
+            List<BoundingBox> freeRects = framePackage.Frame.FreeRects;
+            List<BoundingBox> result = new List<BoundingBox>();
+
+            double maxX, maxY;
+            maxX = int.MinValue;
+            maxY = int.MaxValue;
+
+            // 1. Найти максимально занятую площадь(по всем фигурам)
+            // 2. Найти свободные части(высота детали, длина от детали до конца)
+            // 3. Сортировать по Y
+            // 4. Посмотреть на полученные фигуры
+            // -- Есть пересечения?
+            // --- Сверху - обрезать по X (левая + пв + пн)
+            // ---- Обрезать по Y (левая + пв + пн)
+            // ---- Обрезать по X (избавиться от лв)
+            // 5. Объеденить все что можно (по Y) и избавиться от неактуальных
+
+            return result;
         }
 
         private Vector2 FindBestPosition(Frame frame, Detail detail, out bool placed)
