@@ -42,7 +42,13 @@ namespace TestModule
                 {
                     Frame frame = package.Frame;
 
-                    if (frame.Capacity >= detail.Area)
+                    bool canInsert = frame.FreeRects.Any(free =>
+                    (free.Width >= detail.Width && free.Height >= detail.Height) ||
+                    (free.Width >= detail.Height && free.Height >= detail.Width));
+
+                    // canInsert = frame.Capacity >= detail.Bounds.Area;
+
+                    if (canInsert)
                     {
                         Vector2 newPos = FindBestPosition(frame, detail, out placed);
 
@@ -82,8 +88,10 @@ namespace TestModule
                                 Frame = new Frame(new Vector2(lastBox.MaxX + Pading, 0), width, height),
                                 Details = new List<Detail> { detail }
                             });
-                            framesPackages[index].Frame.Capacity -= detail.Area;
-                            framesPackages[index].Frame.FreeRects = UpdateFreeRects(framesPackages[index].Frame.FreeRects, detail.Bounds);
+                            framesPackages[index+1].Frame.Capacity -= detail.Area;
+                            framesPackages[index+1].Frame.FreeRects = UpdateFreeRects(framesPackages[index + 1].Frame.FreeRects, detail.Bounds);
+
+                            // framesPackages[index].Frame.FreeRects = RestoreFreeRects(framesPackages[index]);
                         }
                         else
                         {
@@ -119,6 +127,13 @@ namespace TestModule
 
             framesPackages.Clear();
             return Result;
+        }
+
+        private List<BoundingBox> RestoreFreeRects(FramePackage framePackage)
+        {
+            // Просмотр имеющихся FreeRects
+            // Обновление FreeRects
+            // Перезапись FreeRects
         }
 
         private Vector2 FindBestPosition(Frame frame, Detail detail, out bool placed)
@@ -179,34 +194,81 @@ namespace TestModule
 
             foreach (var bounds in freeRects)
             {
-                if (takenBox.MinX == bounds.MinX && (takenBox.MaxY == bounds.MinY || takenBox.MinY == bounds.MinY))
+                if (!bounds.Intersects(takenBox))
                 {
-                    double scopeWidth = takenBox.Width / takenBox.Height;
-                    double scopeHeight = takenBox.Height / takenBox.Width;
+                    result.Add(bounds);
+                    continue;
+                }
 
-                    if (scopeWidth > 1.5)
-                    {
-                        result.Add(new BoundingBox(bounds.MinX, takenBox.MaxX, takenBox.MinY, bounds.MaxY));
-                        result.Add(new BoundingBox(takenBox.MaxX, bounds.MaxX, bounds.MinY, bounds.MaxY));
-                    }
-                    else if (scopeHeight > 1.5)
-                    {
-                        result.Add(new BoundingBox(takenBox.MinX, bounds.MaxX, bounds.MinY, takenBox.MinY));
-                        result.Add(new BoundingBox(bounds.MinX, bounds.MaxX, takenBox.MinY, bounds.MaxY));
-                    }
-                    else
-                    {
-                        result.Add(new BoundingBox(takenBox.MaxX, bounds.MaxX, bounds.MinY, takenBox.MinY));
-                        result.Add(new BoundingBox(takenBox.MaxX, bounds.MaxX, takenBox.MinY, bounds.MaxY));
-                        result.Add(new BoundingBox(bounds.MinX, takenBox.MaxX, takenBox.MinY, bounds.MaxY));
-                    }
+                double widthScope, heightScope;
+                widthScope = Math.Abs(takenBox.Width / takenBox.Height);
+                heightScope = Math.Abs(takenBox.Height / takenBox.Width);
+
+                if (widthScope > 1.5)
+                {
+                    // Правая верняя часть
+                    result.Add(new BoundingBox(
+                        takenBox.MaxX,
+                        bounds.MaxX,
+                        bounds.MinY,
+                        takenBox.MaxY
+                        ));
+
+                    // Нижняя большая часть
+                    result.Add(new BoundingBox(
+                        bounds.MinX,
+                        bounds.MaxX,
+                        takenBox.MaxY,
+                        bounds.MaxY
+                        ));
+                }
+                else if(heightScope > 1.5)
+                {
+                    // Левая нижняя часть
+                    result.Add(new BoundingBox(
+                        bounds.MinX,
+                        takenBox.MaxX,
+                        takenBox.MaxY,
+                        bounds.MaxY
+                        ));
+
+                    // Правая большая часть
+                    result.Add(new BoundingBox(
+                        takenBox.MaxX,
+                        bounds.MaxX,
+                        bounds.MinY,
+                        bounds.MaxY
+                        ));
                 }
                 else
                 {
-                    result.Add(bounds);
+                    // Правая верняя часть
+                    result.Add(new BoundingBox(
+                        takenBox.MaxX,
+                        bounds.MaxX,
+                        bounds.MinY,
+                        takenBox.MaxY
+                        ));
+
+                    // Левая нижняя часть
+                    result.Add(new BoundingBox(
+                        bounds.MinX,
+                        takenBox.MaxX,
+                        takenBox.MaxY,
+                        bounds.MaxY
+                        ));
+
+                    // Правая нижняя часть
+                    result.Add(new BoundingBox(
+                        takenBox.MaxX,
+                        bounds.MaxX,
+                        takenBox.MaxY,
+                        bounds.MaxY
+                        ));
                 }
             }
-            return result;
+
+            return result;//.Where(r => r.Width > 0.1 && r.Height > 0.1).ToList();
         }
     }
 

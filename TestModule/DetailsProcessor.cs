@@ -40,6 +40,8 @@ namespace TestModule
         public static int ID { get; private set; } = 0;
         public static string Name { get; private set; }
         public bool NeedRotate = false;
+        public bool IsRotated = false;
+        private bool IsRotedLoker = true;
         
         public List<EntityObject> Entities { get; private set; }
         private Block Block { get; set; }
@@ -64,6 +66,7 @@ namespace TestModule
             Entities = new List<EntityObject>(objects);
             CompletePrepairs();
             FindBestAngle();
+            IsRotedLoker = false;
         }
 
         private void UpdateInsert()
@@ -92,7 +95,7 @@ namespace TestModule
 
             Vector3 offset = new Vector3(
                 x - Bounds.MinX,
-                y - Bounds.MaxY,
+                y - Bounds.MinY,
                 0);
 
             foreach (var entity in Entities)
@@ -210,6 +213,9 @@ namespace TestModule
                 }
             }
 
+            if (!IsRotedLoker)
+                IsRotated = true;
+
             FindPoints();
             FindMinMax();
             FindGeometry();
@@ -234,18 +240,18 @@ namespace TestModule
 
         private void FindMinMax()
         {
-            minX = double.MaxValue;
-            minY = double.MaxValue;
-            maxX = double.MinValue;
-            maxY = double.MinValue;
+            minX = int.MaxValue;
+            minY = int.MinValue;
+            maxX = int.MinValue;
+            maxY = int.MaxValue;
 
             foreach (var p in points)
             {
                 minX = Math.Min(minX, p.X);
-                minY = Math.Min(minY, p.Y);
+                minY = Math.Max(minY, p.Y);
 
                 maxX = Math.Max(maxX, p.X);
-                maxY = Math.Max(maxY, p.Y);
+                maxY = Math.Min(maxY, p.Y);
             }
         }
 
@@ -332,8 +338,8 @@ namespace TestModule
             // Прямоугольники НЕ пересекаются?
             return MinX < other.MaxX &&
                    MaxX > other.MinX &&
-                   MinY < other.MaxY &&
-                   MaxY > other.MinY;
+                   MinY > other.MaxY &&
+                   MaxY < other.MinY;
         }
 
         public bool Contains(BoundingBox other)
