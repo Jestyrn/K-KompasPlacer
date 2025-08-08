@@ -15,7 +15,9 @@ internal class Program
 
     private static void Main(string[] args)
     {
-        StartNewTest();
+        Adapter adapter = new Adapter(TypeOfAdapter.Console);
+
+        // StartNewTest();
     }
 
     private static void StartNewTest()
@@ -77,5 +79,8 @@ internal class Program
             DXF.Entities.Add((EntityObject)item.Clone());
 
         DXF.Save(PathCheck.Replace("ForCheck", "ForCheck-Replace"));
+
+        // попытка нового подхода
+        
     }
 }
