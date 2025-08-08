@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="netDxf" Version="3.0.1" />
+    <PackageReference Include="netDxf" Version="2023.11.10" />
   </ItemGroup>
 
 </Project>

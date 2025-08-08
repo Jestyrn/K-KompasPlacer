@@ -46,6 +46,8 @@ namespace TestModule
         public List<EntityObject> Entities { get; private set; }
         private Block Block { get; set; }
         public Insert Insert { get; private set; }
+        //public List<EntityObject> Polyline { get; private set; }
+        public Polyline2D Polyline { get; private set; }
         public Vector3 Center { get; private set; }
 
         public double Width { get; private set; }
@@ -87,6 +89,131 @@ namespace TestModule
             FindMinMax();
             FindGeometry();
             UpdateInsert();
+            FindPolyline();
+        }
+
+        private void FindPolyline()
+        {
+            var segments = new List<(Vector2 start, Vector2 end, double bulge)>();
+
+            foreach (var ent in Entities)
+            {
+                switch (ent)
+                {
+                    case Line line:
+                        Vector2 vect1 = new Vector2(line.StartPoint.X, line.StartPoint.Y);
+                        Vector2 vect2 = new Vector2(line.EndPoint.X, line.EndPoint.Y);
+                        segments.Add((vect1, vect2, 0 ));
+                        break;
+
+                    case Arc arc:
+                        {
+                            var start = ArcStartPoint(arc);
+                            var end = ArcEndPoint(arc);
+                            double bulge = CalculateBulge(arc);
+                            segments.Add((start, end, bulge));
+                        }
+                        break;
+                }
+            }
+
+            if (segments.Count == 0)
+                throw new ArgumentException("No segments to build polyline");
+
+            // 2. Упорядочиваем сегменты в контур
+            var ordered = new List<(Vector2 start, Vector2 end, double bulge)>();
+            var unused = new List<(Vector2 start, Vector2 end, double bulge)>(segments);
+
+            ordered.Add(unused[0]);
+            unused.RemoveAt(0);
+            const double epsilon = 1e-6;
+
+            while (unused.Count > 0)
+            {
+                var last = ordered[^1];
+                int nextIndex = unused.FindIndex(s => Vector2.Distance(s.start, last.end) < epsilon);
+                if (nextIndex != -1)
+                {
+                    ordered.Add(unused[nextIndex]);
+                    unused.RemoveAt(nextIndex);
+                    continue;
+                }
+
+                // Проверяем совпадение по end точки
+                nextIndex = unused.FindIndex(s => Vector2.Distance(s.end, last.end) < epsilon);
+                if (nextIndex != -1)
+                {
+                    // Переворачиваем сегмент
+                    var seg = unused[nextIndex];
+                    unused[nextIndex] = (seg.end, seg.start, -seg.bulge);
+                    ordered.Add(unused[nextIndex]);
+                    unused.RemoveAt(nextIndex);
+                    continue;
+                }
+
+                // Совпадение по start точки с start точки последнего сегмента
+                nextIndex = unused.FindIndex(s => Vector2.Distance(s.start, last.start) < epsilon);
+                if (nextIndex != -1)
+                {
+                    var seg = unused[nextIndex];
+                    unused[nextIndex] = (seg.end, seg.start, -seg.bulge);
+                    ordered.Insert(0, unused[nextIndex]); // добавляем в начало
+                    unused.RemoveAt(nextIndex);
+                    continue;
+                }
+
+                // Совпадение по end точки с start точки последнего сегмента
+                nextIndex = unused.FindIndex(s => Vector2.Distance(s.end, last.start) < epsilon);
+                if (nextIndex != -1)
+                {
+                    var seg = unused[nextIndex];
+                    unused.RemoveAt(nextIndex);
+                    ordered.Insert(0, seg);
+                    continue;
+                }
+
+                // Если ни одного совпадения нет — выходим из цикла
+                break;
+            }
+
+            // 3. Создаём Polyline2D
+            Polyline = new Polyline2D();
+            foreach (var seg in ordered)
+            {
+                Polyline.Vertexes.Add(new Polyline2DVertex(seg.start) { Bulge = seg.bulge });
+            }
+            // Добавим последнюю точку конечной вершины
+            var lastSeg = ordered[^1];
+            Polyline.Vertexes.Add(new Polyline2DVertex(lastSeg.end));
+            Polyline.IsClosed = true;
+        }
+
+        private static Vector2 ArcStartPoint(Arc arc)
+        {
+            double rad = arc.StartAngle * Math.PI / 180.0;
+            return new Vector2(
+                (float)(arc.Center.X + arc.Radius * Math.Cos(rad)),
+                (float)(arc.Center.Y + arc.Radius * Math.Sin(rad))
+            );
+        }
+
+        private static Vector2 ArcEndPoint(Arc arc)
+        {
+            double rad = arc.EndAngle * Math.PI / 180.0;
+            return new Vector2(
+                (float)(arc.Center.X + arc.Radius * Math.Cos(rad)),
+                (float)(arc.Center.Y + arc.Radius * Math.Sin(rad))
+            );
+        }
+
+        private static double CalculateBulge(Arc arc)
+        {
+            // bulge = tan(угол дуги / 4), угол дуги в радианах
+            double startRad = arc.StartAngle * Math.PI / 180.0;
+            double endRad = arc.EndAngle * Math.PI / 180.0;
+            double delta = endRad - startRad;
+            if (delta < 0) delta += 2 * Math.PI;
+            return Math.Tan(delta / 4.0);
         }
 
         public void MoveDetail(double x, double y)
@@ -289,10 +416,16 @@ namespace TestModule
         }
     }
 
-    public class SimpleDetail
+    public class Segment
     {
-        public string DetailName;
-        public Vector2 NewCoorinats;
+        public Vector2 Start;
+        public Vector2 End;
+        public bool IsArc;
+
+        public Vector2 Center;
+        public double Radius;
+        public double StartAngle;
+        public double EndAngle;
     }
 
     public class BoundingBox
