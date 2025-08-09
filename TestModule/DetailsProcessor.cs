@@ -414,6 +414,31 @@ namespace TestModule
             if (other == null) return 1;
             return Area.CompareTo(other.Area);
         }
+
+        public void AddPading(double pading)
+        {
+            if (pading > 0)
+            {
+                Bounds = new BoundingBox(
+                    Bounds.MinX - (pading / 2),
+                    Bounds.MaxX + (pading / 2),
+                    Bounds.MinY + (pading / 2),
+                    Bounds.MaxY - (pading / 2));
+
+                UpdateBoundsDxf();
+            }
+        }
+
+        private void UpdateBoundsDxf()
+        {
+            BoundsDXF = new List<EntityObject>
+            {
+                new Line(new Vector2(Bounds.MinX, Bounds.MinY), new Vector2(Bounds.MaxX, Bounds.MinY)),
+                new Line(new Vector2(Bounds.MaxX, Bounds.MinY), new Vector2(Bounds.MaxX, Bounds.MaxY)),
+                new Line(new Vector2(Bounds.MaxX, Bounds.MaxY), new Vector2(Bounds.MinX, Bounds.MaxY)),
+                new Line(new Vector2(Bounds.MinX, Bounds.MaxY), new Vector2(Bounds.MinX, Bounds.MinY))
+            };
+        }
     }
 
     public class Segment
