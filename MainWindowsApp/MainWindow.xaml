@@ -269,7 +269,7 @@
                                     </Border>
 
                                     <Border Grid.Column="2" Grid.Row="0" CornerRadius="0 16 16 0" Background="#043056" Margin="0 0 0 10">
-                                        <TextBox Foreground="White" FontSize="12" Background="Transparent" BorderBrush="Transparent" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" x:Name="RealSize" Text="0000 : 0000"/>
+                                        <TextBox Foreground="White" FontSize="12" Background="Transparent" BorderBrush="Transparent" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" x:Name="RealSize" Text="0000 : 0000" TextChanged="RealSize_TextChanged"/>
                                     </Border>
                                     <Border Grid.Column="2" Grid.Row="1" CornerRadius="0 16 16 0" Background="#043056" Margin="0 0 0 10">
                                         <TextBox Foreground="White" FontSize="12" Background="Transparent" BorderBrush="Transparent" Margin="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" x:Name="BorderPading">

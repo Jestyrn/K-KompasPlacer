@@ -81,6 +81,11 @@ namespace MainWindowsApp
             CheckState();
         }
 
+        private void RealSize_TextChanged(object sender, RoutedEventArgs e)
+        {
+            CurrentSize.Text = RealSize.Text.ToString();
+        }
+
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             // BorderPading ListPading DetailsPading
@@ -101,7 +106,7 @@ namespace MainWindowsApp
                         "Отсутствует сеппаратор между шириной и высотой (\" : \")");
                 }
 
-                if (((currentWidth <= minimumWidth) && (currentHeight <= minimumHeight)) || ((currentWidth <= minimumHeight) && (currentHeight <= currentWidth)))
+                if (((currentWidth >= minimumWidth) && (currentHeight >= minimumHeight)) || ((currentWidth >= minimumHeight) && (currentHeight >= currentWidth)))
                 {
                     double pading = double.TryParse(BorderPading.Text, out a) ? a : 0;
                     double listPading = double.TryParse(ListPading.Text, out a) ? a : 0;
@@ -146,8 +151,11 @@ namespace MainWindowsApp
             MinCount.Text = DataForWpf.MinCount.ToString();
             RealSize.Text = MinSize.Text;
         }
-        
-        
+
+        private void RealSize_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
     }
 
     //public class MyViewModel : INotifyPropertyChanged
