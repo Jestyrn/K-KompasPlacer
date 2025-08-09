@@ -34,27 +34,26 @@
             label15 = new Label();
             label1 = new Label();
             panel2 = new Panel();
-            label19 = new Label();
-            label18 = new Label();
-            label9 = new Label();
+            WriterPathLabel = new Label();
+            ReaderPathLabel = new Label();
+            MinCount = new Label();
             label8 = new Label();
             label17 = new Label();
-            label7 = new Label();
+            CurrentSize = new Label();
             label16 = new Label();
             label6 = new Label();
-            label5 = new Label();
+            MinSize = new Label();
             label4 = new Label();
             label10 = new Label();
-            label3 = new Label();
+            DetailsCount = new Label();
             label2 = new Label();
             panel3 = new Panel();
+            HeightTextBox = new NumericUpDown();
+            WidthTextBox = new NumericUpDown();
             CalculateButton = new Button();
-            SaveSettingsButton = new Button();
             DetailsPadingTextBox = new TextBox();
             ListPadingTextBox = new TextBox();
             PadingTextBox = new TextBox();
-            HeightTextBox = new TextBox();
-            WidthTextBox = new TextBox();
             label11 = new Label();
             label12 = new Label();
             label20 = new Label();
@@ -63,6 +62,8 @@
             panel1.SuspendLayout();
             panel2.SuspendLayout();
             panel3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)HeightTextBox).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)WidthTextBox).BeginInit();
             SuspendLayout();
             // 
             // panel1
@@ -85,7 +86,7 @@
             button3.TabIndex = 1;
             button3.Text = "Указать путь";
             button3.UseVisualStyleBackColor = true;
-            button3.Click += button3_Click;
+            button3.Click += SavePath_Click;
             // 
             // ChousePath
             // 
@@ -95,7 +96,7 @@
             ChousePath.TabIndex = 1;
             ChousePath.Text = "Указать путь";
             ChousePath.UseVisualStyleBackColor = true;
-            ChousePath.Click += ChousePath_Click;
+            ChousePath.Click += ChoosePath_Click;
             // 
             // label15
             // 
@@ -118,50 +119,50 @@
             // panel2
             // 
             panel2.BackColor = SystemColors.ControlDark;
-            panel2.Controls.Add(label19);
-            panel2.Controls.Add(label18);
-            panel2.Controls.Add(label9);
+            panel2.Controls.Add(WriterPathLabel);
+            panel2.Controls.Add(ReaderPathLabel);
+            panel2.Controls.Add(MinCount);
             panel2.Controls.Add(label8);
             panel2.Controls.Add(label17);
-            panel2.Controls.Add(label7);
+            panel2.Controls.Add(CurrentSize);
             panel2.Controls.Add(label16);
             panel2.Controls.Add(label6);
-            panel2.Controls.Add(label5);
+            panel2.Controls.Add(MinSize);
             panel2.Controls.Add(label4);
             panel2.Controls.Add(label10);
-            panel2.Controls.Add(label3);
+            panel2.Controls.Add(DetailsCount);
             panel2.Controls.Add(label2);
             panel2.Location = new Point(12, 93);
             panel2.Name = "panel2";
             panel2.Size = new Size(358, 345);
             panel2.TabIndex = 0;
             // 
-            // label19
+            // WriterPathLabel
             // 
-            label19.AutoSize = true;
-            label19.Location = new Point(205, 319);
-            label19.Name = "label19";
-            label19.Size = new Size(38, 15);
-            label19.TabIndex = 0;
-            label19.Text = "label2";
+            WriterPathLabel.AutoSize = true;
+            WriterPathLabel.Location = new Point(205, 319);
+            WriterPathLabel.Name = "WriterPathLabel";
+            WriterPathLabel.Size = new Size(38, 15);
+            WriterPathLabel.TabIndex = 0;
+            WriterPathLabel.Text = "label2";
             // 
-            // label18
+            // ReaderPathLabel
             // 
-            label18.AutoSize = true;
-            label18.Location = new Point(205, 283);
-            label18.Name = "label18";
-            label18.Size = new Size(38, 15);
-            label18.TabIndex = 0;
-            label18.Text = "label2";
+            ReaderPathLabel.AutoSize = true;
+            ReaderPathLabel.Location = new Point(205, 283);
+            ReaderPathLabel.Name = "ReaderPathLabel";
+            ReaderPathLabel.Size = new Size(38, 15);
+            ReaderPathLabel.TabIndex = 0;
+            ReaderPathLabel.Text = "label2";
             // 
-            // label9
+            // MinCount
             // 
-            label9.AutoSize = true;
-            label9.Location = new Point(205, 181);
-            label9.Name = "label9";
-            label9.Size = new Size(38, 15);
-            label9.TabIndex = 0;
-            label9.Text = "label2";
+            MinCount.AutoSize = true;
+            MinCount.Location = new Point(205, 181);
+            MinCount.Name = "MinCount";
+            MinCount.Size = new Size(38, 15);
+            MinCount.TabIndex = 0;
+            MinCount.Text = "label2";
             // 
             // label8
             // 
@@ -181,14 +182,14 @@
             label17.TabIndex = 0;
             label17.Text = "Путь для сохранения";
             // 
-            // label7
+            // CurrentSize
             // 
-            label7.AutoSize = true;
-            label7.Location = new Point(205, 136);
-            label7.Name = "label7";
-            label7.Size = new Size(38, 15);
-            label7.TabIndex = 0;
-            label7.Text = "label2";
+            CurrentSize.AutoSize = true;
+            CurrentSize.Location = new Point(205, 136);
+            CurrentSize.Name = "CurrentSize";
+            CurrentSize.Size = new Size(38, 15);
+            CurrentSize.TabIndex = 0;
+            CurrentSize.Text = "label2";
             // 
             // label16
             // 
@@ -208,14 +209,14 @@
             label6.TabIndex = 0;
             label6.Text = "Текущие размеры листа";
             // 
-            // label5
+            // MinSize
             // 
-            label5.AutoSize = true;
-            label5.Location = new Point(205, 95);
-            label5.Name = "label5";
-            label5.Size = new Size(38, 15);
-            label5.TabIndex = 0;
-            label5.Text = "label2";
+            MinSize.AutoSize = true;
+            MinSize.Location = new Point(205, 95);
+            MinSize.Name = "MinSize";
+            MinSize.Size = new Size(38, 15);
+            MinSize.TabIndex = 0;
+            MinSize.Text = "label2";
             // 
             // label4
             // 
@@ -235,14 +236,14 @@
             label10.TabIndex = 0;
             label10.Text = "Статистика";
             // 
-            // label3
+            // DetailsCount
             // 
-            label3.AutoSize = true;
-            label3.Location = new Point(205, 53);
-            label3.Name = "label3";
-            label3.Size = new Size(38, 15);
-            label3.TabIndex = 0;
-            label3.Text = "label2";
+            DetailsCount.AutoSize = true;
+            DetailsCount.Location = new Point(205, 53);
+            DetailsCount.Name = "DetailsCount";
+            DetailsCount.Size = new Size(38, 15);
+            DetailsCount.TabIndex = 0;
+            DetailsCount.Text = "label2";
             // 
             // label2
             // 
@@ -256,13 +257,12 @@
             // panel3
             // 
             panel3.BackColor = SystemColors.ControlDark;
+            panel3.Controls.Add(HeightTextBox);
+            panel3.Controls.Add(WidthTextBox);
             panel3.Controls.Add(CalculateButton);
-            panel3.Controls.Add(SaveSettingsButton);
             panel3.Controls.Add(DetailsPadingTextBox);
             panel3.Controls.Add(ListPadingTextBox);
             panel3.Controls.Add(PadingTextBox);
-            panel3.Controls.Add(HeightTextBox);
-            panel3.Controls.Add(WidthTextBox);
             panel3.Controls.Add(label11);
             panel3.Controls.Add(label12);
             panel3.Controls.Add(label20);
@@ -273,25 +273,33 @@
             panel3.Size = new Size(385, 345);
             panel3.TabIndex = 0;
             // 
+            // HeightTextBox
+            // 
+            HeightTextBox.Enabled = false;
+            HeightTextBox.Location = new Point(253, 51);
+            HeightTextBox.Name = "HeightTextBox";
+            HeightTextBox.Size = new Size(100, 23);
+            HeightTextBox.TabIndex = 2;
+            HeightTextBox.ValueChanged += TextBox_ValueChanged;
+            // 
+            // WidthTextBox
+            // 
+            WidthTextBox.Enabled = false;
+            WidthTextBox.Location = new Point(147, 51);
+            WidthTextBox.Name = "WidthTextBox";
+            WidthTextBox.Size = new Size(100, 23);
+            WidthTextBox.TabIndex = 2;
+            WidthTextBox.ValueChanged += TextBox_ValueChanged;
+            // 
             // CalculateButton
             // 
             CalculateButton.Enabled = false;
-            CalculateButton.Location = new Point(194, 319);
+            CalculateButton.Location = new Point(13, 307);
             CalculateButton.Name = "CalculateButton";
-            CalculateButton.Size = new Size(188, 23);
+            CalculateButton.Size = new Size(358, 35);
             CalculateButton.TabIndex = 1;
             CalculateButton.Text = "Начать рассчет";
             CalculateButton.UseVisualStyleBackColor = true;
-            // 
-            // SaveSettingsButton
-            // 
-            SaveSettingsButton.Enabled = false;
-            SaveSettingsButton.Location = new Point(3, 319);
-            SaveSettingsButton.Name = "SaveSettingsButton";
-            SaveSettingsButton.Size = new Size(171, 23);
-            SaveSettingsButton.TabIndex = 1;
-            SaveSettingsButton.Text = "Сохранить изменения";
-            SaveSettingsButton.UseVisualStyleBackColor = true;
             // 
             // DetailsPadingTextBox
             // 
@@ -319,24 +327,6 @@
             PadingTextBox.PlaceholderText = "Ввод отступа (0)";
             PadingTextBox.Size = new Size(100, 23);
             PadingTextBox.TabIndex = 1;
-            // 
-            // HeightTextBox
-            // 
-            HeightTextBox.Enabled = false;
-            HeightTextBox.Location = new Point(253, 50);
-            HeightTextBox.Name = "HeightTextBox";
-            HeightTextBox.PlaceholderText = "Ввод высоты";
-            HeightTextBox.Size = new Size(100, 23);
-            HeightTextBox.TabIndex = 1;
-            // 
-            // WidthTextBox
-            // 
-            WidthTextBox.Enabled = false;
-            WidthTextBox.Location = new Point(147, 50);
-            WidthTextBox.Name = "WidthTextBox";
-            WidthTextBox.PlaceholderText = "Ввод ширины";
-            WidthTextBox.Size = new Size(100, 23);
-            WidthTextBox.TabIndex = 1;
             // 
             // label11
             // 
@@ -399,6 +389,8 @@
             panel2.PerformLayout();
             panel3.ResumeLayout(false);
             panel3.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)HeightTextBox).EndInit();
+            ((System.ComponentModel.ISupportInitialize)WidthTextBox).EndInit();
             ResumeLayout(false);
         }
 
@@ -408,21 +400,19 @@
         private Button ChousePath;
         private Label label1;
         private Panel panel2;
-        private Label label9;
+        private Label MinCount;
         private Label label8;
-        private Label label7;
+        private Label CurrentSize;
         private Label label6;
-        private Label label5;
+        private Label MinSize;
         private Label label4;
         private Label label10;
-        private Label label3;
+        private Label DetailsCount;
         private Label label2;
         private Panel panel3;
         private Button SaveSettingsButton;
         private TextBox DetailsPadingTextBox;
         private TextBox PadingTextBox;
-        private TextBox HeightTextBox;
-        private TextBox WidthTextBox;
         private Label label11;
         private Label label12;
         private Label label13;
@@ -430,11 +420,13 @@
         private Button button3;
         private Label label15;
         private Button CalculateButton;
-        private Label label19;
-        private Label label18;
+        private Label WriterPathLabel;
+        private Label ReaderPathLabel;
         private Label label17;
         private Label label16;
         private TextBox ListPadingTextBox;
         private Label label20;
+        private NumericUpDown HeightTextBox;
+        private NumericUpDown WidthTextBox;
     }
 }
