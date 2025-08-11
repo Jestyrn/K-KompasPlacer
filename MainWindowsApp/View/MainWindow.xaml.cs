@@ -1,24 +1,11 @@
 ﻿using MainWindowsApp.VeiwModel;
 using Microsoft.Win32;
-using System.ComponentModel;
-using System.Reflection.Metadata.Ecma335;
-using System.Text;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using TestModule;
 
 namespace MainWindowsApp
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         private string ReaderPath;
@@ -35,6 +22,15 @@ namespace MainWindowsApp
             InitializeComponent();
             viewModel = new AppViewModel();
             DataContext = viewModel;
+
+            //
+            //
+            //
+            //
+            //
+            //
+            //
+            // конец. Объявить очитску файла Cleaner
         }
 
         private void DragWindow(object sender, MouseButtonEventArgs e)
