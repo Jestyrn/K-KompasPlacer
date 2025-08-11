@@ -10,15 +10,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TestModule\TestModule.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Folder Include="View\" />
   </ItemGroup>
 
   <ItemGroup>
     <Page Include="App.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Models\Models.csproj" />
   </ItemGroup>
 
 </Project>
