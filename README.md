@@ -15,7 +15,7 @@
   <img src="https://github.com/Jestyrn/K-KompasPlacer/blob/master/Readme/S-NotReady.png?raw=true" width="350">
   <img src="https://github.com/Jestyrn/K-KompasPlacer/blob/master/Readme/D-NotReady.png?raw=true" width="350">
 </p>
-
+<h2>✅Ready to use v1.0 WPF✅</h2>
 <h2>How it work</h2>
 
 - The user uploads a `.dxf` file with details (yes, with the very drawing that someone lovingly made in CAD for three nights in a row).
