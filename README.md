@@ -12,8 +12,7 @@
 <h2>Preview</h2>
 
 <p align="center">
-  <img src="https://github.com/Jestyrn/K-KompasPlacer/blob/master/Readme/S-NotReady.png?raw=true" width="350">
-  <img src="https://github.com/Jestyrn/K-KompasPlacer/blob/master/Readme/D-NotReady.png?raw=true" width="350">
+  <img src="https://github.com/Jestyrn/K-KompasPlacer/blob/master/Readme/ProgramView.png" width="700">
 </p>
 <h2>✅Ready to use v1.0 WPF✅</h2>
 <h2>How it work</h2>
