@@ -56,6 +56,12 @@ namespace MainWindowsApp
             if (result == true)
                 ReaderPath = fileDialog.FileName;
 
+            RealSize.IsEnabled = false;
+            BorderPading.IsEnabled = false;
+            ListPading.IsEnabled = false;
+            DetailsPading.IsEnabled = false;
+            StartButton.IsEnabled = false;
+
             FileName.Text = System.IO.Path.GetFileName(ReaderPath);
             ReaderChosen = true;
 
@@ -77,11 +83,6 @@ namespace MainWindowsApp
             CheckState();
         }
 
-        private void RealSize_TextChanged(object sender, RoutedEventArgs e)
-        {
-            CurrentSize.Text = RealSize.Text.ToString();
-        }
-
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
             if (ReaderChosen)
@@ -97,8 +98,12 @@ namespace MainWindowsApp
                 }
                 else
                 {
-                    throw new Exception("Размеры не валидны\n" +
-                        "Отсутствует сеппаратор между шириной и высотой (\" : \")");
+                    string text = "Размеры не валидны\n" +
+                        "Отсутствует сеппаратор между шириной и высотой (\" : \")";
+
+                    MessageBox.Show(text, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                    throw new Exception(text);
                 }
 
                 if (((currentWidth >= minimumWidth) && (currentHeight >= minimumHeight)) || ((currentWidth >= minimumHeight) && (currentHeight >= currentWidth)))
@@ -106,8 +111,6 @@ namespace MainWindowsApp
                     double pading = double.TryParse(BorderPading.Text, out a) ? a : 0;
                     double listPading = double.TryParse(ListPading.Text, out a) ? a : 0;
                     double detailPading = double.TryParse(DetailsPading.Text, out a) ? a : 0;
-
-                    // Adapter.StartWpf(ReaderPath, WriterPath, pading, listPading, detailPading);
 
                     string size = RealSize.Text;
                     string insPad = BorderPading.Text;
@@ -119,6 +122,7 @@ namespace MainWindowsApp
                 else
                 {
                     MessageBox.Show("Размеры оказаль некоректными");
+                    return;
                 }
             }
         }
