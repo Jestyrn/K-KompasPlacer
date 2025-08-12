@@ -9,13 +9,13 @@
   <a href="/README.md">Английский</a> | Русский
 </p>
 
-<h2>✅Готово к тестированию✅</h2>
 <h2>Предпросмотр</h2>
 
 <p align="center">
-  <img src="https://github.com/Jestyrn/K-KompasPlacer/blob/master/Readme/S-NotReady.png?raw=true" width="350">
-  <img src="https://github.com/Jestyrn/K-KompasPlacer/blob/master/Readme/D-NotReady.png?raw=true" width="350">
+  <img src="https://github.com/Jestyrn/K-KompasPlacer/blob/master/Readme/ProgramView.png" width="700">
 </p>
+
+<h2>✅Готово к тестированию✅</h2>
 
 <h2>Как это работает?</h2>
 
