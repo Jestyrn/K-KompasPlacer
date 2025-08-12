@@ -1,5 +1,7 @@
-﻿using MainWindowsApp.VeiwModel;
+﻿using MainWindowsApp.Model;
+using MainWindowsApp.VeiwModel;
 using Microsoft.Win32;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using TestModule;
@@ -15,22 +17,15 @@ namespace MainWindowsApp
         private bool WriterChosen = false;
 
         private bool ReadyToNesting = false;
-        private AppViewModel viewModel;
+        private AppViewModel ViewModel;
+        private DataController Controller;
 
         public MainWindow()
         {
             InitializeComponent();
-            viewModel = new AppViewModel();
-            DataContext = viewModel;
-
-            //
-            //
-            //
-            //
-            //
-            //
-            //
-            // конец. Объявить очитску файла Cleaner
+            ViewModel = new AppViewModel();
+            Controller = new DataController();
+            DataContext = ViewModel;
         }
 
         private void DragWindow(object sender, MouseButtonEventArgs e)
@@ -87,7 +82,7 @@ namespace MainWindowsApp
             CurrentSize.Text = RealSize.Text.ToString();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private async void Button_Click(object sender, RoutedEventArgs e)
         {
             if (ReaderChosen)
             {
@@ -112,7 +107,14 @@ namespace MainWindowsApp
                     double listPading = double.TryParse(ListPading.Text, out a) ? a : 0;
                     double detailPading = double.TryParse(DetailsPading.Text, out a) ? a : 0;
 
-                    Adapter.StartWpf(ReaderPath, WriterPath, pading, listPading, detailPading);
+                    // Adapter.StartWpf(ReaderPath, WriterPath, pading, listPading, detailPading);
+
+                    string size = RealSize.Text;
+                    string insPad = BorderPading.Text;
+                    string detPad = DetailsPading.Text;
+                    string fraPad = ListPading.Text;
+
+                    await Task.Run(() => Controller.ExecuteNesting(size, insPad, detPad, fraPad));
                 }
                 else
                 {
@@ -125,10 +127,9 @@ namespace MainWindowsApp
         {
             if (ReaderChosen && WriterChosen)
             {
-                MessageBox.Show("Готовятся данные для отображения, пожалуйста подождите");
-                var adapter = await Task.Run(() => new Adapter(TypeOfAdapter.WPF, ReaderPath));
+                MessageBox.Show("Готовятся данные для отображения, пожалуйста подождите.\n\nПосле окончания элементы управления должны стать активны.", "Ожидайте.", MessageBoxButton.OK, MessageBoxImage.Information);
+                await Task.Factory.StartNew(() => Controller.CalculateDetails(ReaderPath, WriterPath));
 
-                await CheckStateAsync();
                 UpdateUIWithData();
 
                 RealSize.IsEnabled = true;
@@ -141,20 +142,12 @@ namespace MainWindowsApp
             }
         }
 
-        private async Task CheckStateAsync()
-        {
-            while (!DataForWpf.Checker)
-            {
-                await Task.Delay(2500);
-            }
-        }
-
         private void UpdateUIWithData()
         {
-            viewModel.Frame.DetailsCount = DataForWpf.DetailsCount.ToString();
-            viewModel.Frame.MinSize = DataForWpf.MinSize.ToString();
-            viewModel.Frame.MinFrames = DataForWpf.MinCount.ToString();
-            viewModel.InputView.FrameSize = DataForWpf.MinSize.ToString();
+            ViewModel.Frame.DetailsCount = Controller.DetailsCount;
+            ViewModel.Frame.MinSize = Controller.MinSize;
+            ViewModel.Frame.MinFrames = Controller.FramesCount;
+            ViewModel.InputView.FrameSize = Controller.MinSize;
         }
     }
 }
