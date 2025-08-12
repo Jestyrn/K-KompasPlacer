@@ -125,6 +125,12 @@ namespace MainWindowsApp.Model
             var controller = new FrameController(Details, width, height, (int)_framePad, (int)_insidePad);
             List<Insert> ins = controller.TakeFilled();
 
+            if (controller.Ex.Length > 3)
+            {
+                MessageBox.Show(controller.Ex, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             DxfDocument dxf = new DxfDocument();
             foreach (var item in ins)
                 dxf.Entities.Add((EntityObject)item.Clone());
