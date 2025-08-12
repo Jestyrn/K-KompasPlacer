@@ -1,14 +1,6 @@
-﻿using netDxf;
-using netDxf.Blocks;
-using netDxf.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+﻿using netDxf.Entities;
 using Vector2 = netDxf.Vector2;
+using System.Windows;
 
 namespace TestModule
 {
@@ -22,6 +14,7 @@ namespace TestModule
         private double height;
 
         private int Pading;
+        public string Ex = "";
 
         public FrameController(List<Detail> details, double width, double height, int pading = 0, int insPading = 0)
         {
@@ -66,9 +59,13 @@ namespace TestModule
                 if (!detailPlaced)
                 {
                     if (!Frame.Bounds.CanInsert(detail.Bounds))
-                        throw new Exception($"Выбран слишком маленький размер\n" +
+                    {
+                        Ex = $"Выбран слишком маленький размер\n" +
                                             $"Frame: {Frame.Bounds.Width}, {Frame.Bounds.Height}\n" +
-                                            $"Detail: {detail.Bounds.Width}, {detail.Bounds.Height}");
+                                            $"Detail: {detail.Bounds.Width}, {detail.Bounds.Height}";
+
+                        return null;
+                    }
 
                     AddNewFrameWithDetail(detail);
                 }
