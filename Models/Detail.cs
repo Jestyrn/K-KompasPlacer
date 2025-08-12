@@ -10,6 +10,7 @@ public class Detail : IComparable<Detail>
     public bool NeedRotate = false;
     public bool IsRotated = false;
     private bool IsRotedLoker = true;
+    private double Pading = 0;
 
     public List<EntityObject> Entities { get; private set; }
     private Block Block { get; set; }
@@ -221,6 +222,11 @@ public class Detail : IComparable<Detail>
             maxX = Math.Max(maxX, p.X);
             maxY = Math.Min(maxY, p.Y);
         }
+
+        minX -= Pading / 2;
+        maxX += Pading / 2;
+        minY += Pading / 2;
+        maxY -= Pading / 2;
     }
 
     private void FindPoints()
@@ -258,6 +264,8 @@ public class Detail : IComparable<Detail>
 
     public void AddPading(double pading)
     {
+        Pading = pading;
+
         if (pading > 0)
         {
             Bounds = new BoundingBox(

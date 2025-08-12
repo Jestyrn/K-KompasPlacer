@@ -23,7 +23,7 @@ namespace TestModule
 
         private int Pading;
 
-        public FrameController(List<Detail> details, double width, double height, int pading = 0)
+        public FrameController(List<Detail> details, double width, double height, int pading = 0, int insPading = 0)
         {
             this.details = details;
             framesPackages = new List<FramePackage>();
@@ -31,6 +31,7 @@ namespace TestModule
             this.height = height;
 
             Pading = pading;
+            Frame.Pading = insPading;
         }
 
         public List<Insert> TakeFilled()
@@ -95,7 +96,7 @@ namespace TestModule
         {
             Vector2 pos = framesPackages.Count == 0
                 ? new Vector2(0, 0)
-                : new Vector2(framesPackages.Last().Frame.BoundingBox.MaxX + Pading, 0);
+                : new Vector2(framesPackages.Last().Frame.BoundingBox.MaxX + Pading + Frame.Pading, 0);
 
             detail.MoveDetail(pos.X, pos.Y);
 
