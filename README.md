@@ -12,34 +12,44 @@
 <h2>Preview</h2>
 
 <p align="center">
-  <img src="https://github.com/Jestyrn/K-KompasPlacer/blob/master/Readme/S-NotReady.png?raw=true" width="350">
-  <img src="https://github.com/Jestyrn/K-KompasPlacer/blob/master/Readme/D-NotReady.png?raw=true" width="350">
+  <img src="https://github.com/Jestyrn/K-KompasPlacer/blob/master/Readme/ProgramView.png" width="700">
 </p>
-<h2>✅Ready to use v1.0 WPF✅</h2>
-<h2>How it work</h2>
 
-- The user uploads a `.dxf` file with details (yes, with the very drawing that someone lovingly made in CAD for three nights in a row).
-- Specifies the size of the frame — it's like telling the program: "these are the boundaries of reality, work inside."
-- Next, the netDxf library comes into play (thanks to the authors, you are the best):
-  - We read all the elements from the drawing;
-  - We take out the components (sometimes even what we have long forgotten to remove);
-  - We read the specifications (if there are any, we don't insist, but it's nice).
+<h2>✅ Ready for Testing ✅</h2>
 
-- Based on the entered dimensions, we create a frame — not a spiritual one, but a rectangular one, in millimeters.
-- The automatic Tetris algorithm is activated:
-  - We calculate how much free space there is;
-  - We are looking for a suitable part (which will not go over the edges and will not climb on the neighbor);
-  - We post it (yes, with all love and respect for accuracy);
-  - We're counting the available space again;
-  - We repeat while there is someone to put down.
+<h2>How to Use It?</h2>
 
-- If there are no suitable parts left:
-  - Create a new frame (just like that, without downloads and microtransactions);
-  - We continue the placement as if nothing had happened.
+1. Specify the path to the `.dxf` file  
+2. Specify the folder where the result should be saved  
+3. Wait until the data is displayed on the screen  
+4. Set the desired parameters in the right panel  
+5. Click the `Start Processing` button  
+6. Wait for completion, then check the “output” folder  
+   _(a file named_ `ReadyToUpload.dxf` _will appear)_
 
-- When the details run out:
-  - The program says, "That's it, we're done, live in peace";
-  - And saves the result in `.dxf` so that you can open it later, print it out, or proudly show it to your superiors.
+<h2>How It Works</h2>
+
+1. **File Reading**  
+   - Calculate the minimum and maximum coordinates  
+   - Build a `BoundingBox` based on these coordinates (a simplified version of the part as a rectangle)  
+   - Define additional helper arguments  
+
+2. **Initial Processing**  
+   - Remove unnecessary data (any part with fewer than 6 elements is discarded — a point counts as an element)  
+   - Sort parts by size  
+
+3. **Calculation Process**  
+   - Pass the provided parameters to the corresponding settings (margins to margins, sizes to sizes)  
+   - Create the first `Frame`  
+   - Place the first part in the top-left corner (all current and future calculations are based on the `BoundingBox` coordinates)  
+   - Divide the remaining space in the frame into horizontal and vertical areas (excluding the occupied cell)  
+   - Repeat the process until the first frame is filled (then create a new one and continue until all parts are placed)  
+
+4. **Output**  
+   - After processing all parts, store them in a `FramePackage` (Frame + Parts inside)  
+   - Add each `FramePackage` to `netDXF`  
+   - Save the result to `ReadyToUpload.dxf`  
+
 <hr>
 
 <p align="center">
