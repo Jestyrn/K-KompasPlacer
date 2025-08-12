@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace MainWindowsApp.VeiwModel
@@ -23,6 +24,7 @@ namespace MainWindowsApp.VeiwModel
             set
             {
                 _frameSize = value;
+                _frameSize = CheckFormat(_frameSize);
                 OnPropertyChanged(nameof(FrameSize));
             }
         }
@@ -67,6 +69,11 @@ namespace MainWindowsApp.VeiwModel
             _padingInside = "0000";
             _framePading = "0000";
             _detailPading = "0000";
+        }
+
+        private string CheckFormat(string size)
+        {
+            return size.Replace(" ", "").Replace(":", " : ");
         }
     }
 }
