@@ -54,5 +54,5 @@
 
 <p align="center">
   <strong>Jestyrn – 2025</strong><br>
-  <sub>License - MIT</sub>
+  <sub>License - MIT.</sub>
 </p>
