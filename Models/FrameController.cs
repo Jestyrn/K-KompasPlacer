@@ -51,7 +51,9 @@ namespace TestModule
                     Vector2 newPos = FindBestPosition(frame, detail, out bool foundPosition);
                     if (!foundPosition) continue;
 
-                    detailPlaced = PlaceDetail(package, detail, newPos);
+                    if (!PlaceDetail(package, detail, newPos)) continue;
+                    detailPlaced = true;
+
                     break;
                 }
 
@@ -99,8 +101,9 @@ namespace TestModule
                 detail.MoveDetail(position.X + detail.Pading, position.Y - detail.Pading);
             }
 
-            if (!package.Frame.BoundingBox.InsideBounds(detail.Bounds))
-                return false;
+            if (package.Frame.BoundingBox.Intersects(detail.Bounds))
+                if (!package.Frame.BoundingBox.InsideBounds(detail.Bounds))
+                    return false;
             
             package.Details.Add(detail);
             package.Frame.Capacity -= detail.Area;
