@@ -77,6 +77,12 @@ namespace MainWindowsApp
             if (result == true)
                 WriterPath = folderDialog.FolderName;
 
+            RealSize.IsEnabled = false;
+            BorderPading.IsEnabled = false;
+            ListPading.IsEnabled = false;
+            DetailsPading.IsEnabled = false;
+            StartButton.IsEnabled = false;
+
             SaveFolder.Text = System.IO.Path.GetFileName(WriterPath);
             WriterChosen = true;
 
