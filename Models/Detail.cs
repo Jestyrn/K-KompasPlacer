@@ -10,7 +10,11 @@ public class Detail : IComparable<Detail>
     public bool NeedRotate = false;
     public bool IsRotated = false;
     private bool IsRotedLoker = true;
-    private double Pading = 0;
+    public double Pading { get; private set; } = 0;
+    public double LeftPading { get; private set; } = 0;
+    public double RightPading { get; private set; } = 0;
+    public double UpPading { get; private set; } = 0;
+    public double DownPading { get; private set; } = 0;
 
     public List<EntityObject> Entities { get; private set; }
     private Block Block { get; set; }
@@ -20,7 +24,8 @@ public class Detail : IComparable<Detail>
     public double Width { get; private set; }
     public double Height { get; private set; }
     public double Area { get; private set; }
-    public BoundingBox Bounds { get; private set; }
+    public BoundingBox Bounds { get; set; }
+    public BoundingBox OriginBounds { get; private set; }
     public List<EntityObject> BoundsDXF { get; private set; } = new List<EntityObject>();
 
     private List<Vector3> points = new List<Vector3>();
@@ -198,6 +203,7 @@ public class Detail : IComparable<Detail>
         Area = Width * Height;
 
         Bounds = new BoundingBox(minX, maxX, minY, maxY);
+        OriginBounds = new BoundingBox(minX + LeftPading, maxX - RightPading, minY - UpPading, maxY + DownPading);
         BoundsDXF = new List<EntityObject>
             {
                 new Line(new Vector2(minX, minY), new Vector2(minX, maxY)),
@@ -266,13 +272,41 @@ public class Detail : IComparable<Detail>
     {
         Pading = pading;
 
-        if (pading > 0)
+        LeftPading = pading;
+        RightPading = pading;
+        UpPading = pading;
+        DownPading = pading;
+
+        Bounds = new BoundingBox(OriginBounds);
+
+        if (pading >= 0)
         {
             Bounds = new BoundingBox(
                 Bounds.MinX - (pading / 2),
                 Bounds.MaxX + (pading / 2),
                 Bounds.MinY + (pading / 2),
                 Bounds.MaxY - (pading / 2));
+
+            UpdateBoundsDxf();
+        }
+    }
+
+    public void AddPading(double left = -1, double right = -1, double down = -1, double up = -1)
+    {
+        LeftPading = left == -1 ? LeftPading : 0;
+        RightPading = right == -1 ? RightPading : 0;
+        UpPading = up == -1 ? UpPading : 0;
+        DownPading = down == -1 ? DownPading : 0;
+
+        Bounds = new BoundingBox(OriginBounds);
+
+        if (left >= 0 && right >= 0 && up >= 0 && down >= 0)
+        {
+            Bounds = new BoundingBox(
+                Bounds.MinX - left,
+                Bounds.MaxX + right,
+                Bounds.MinY + up,
+                Bounds.MaxY - down);
 
             UpdateBoundsDxf();
         }

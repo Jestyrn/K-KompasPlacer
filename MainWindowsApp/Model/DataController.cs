@@ -105,14 +105,20 @@ namespace MainWindowsApp.Model
         {
             for (int i = 0; i < Details.Count; i++)
             {
+                // Удаление мелких элементов
                 if (Details[i].Entities.Count <= 6)
                 {
                     Details.RemoveAt(i);
                     i--;
                 }
 
+                // Добавление отступа
+                Details[i].AddPading(0);
+                Details[i].Bounds = new BoundingBox(Details[i].OriginBounds);
+                
                 Details[i].AddPading(_detailsPad);
 
+                // Поворот детали широкой стороной
                 if (Details[i].Width < Details[i].Height)
                 {
                     Details[i].RotateDetail(90);
@@ -135,11 +141,21 @@ namespace MainWindowsApp.Model
             foreach (var item in ins)
                 dxf.Entities.Add((EntityObject)item.Clone());
 
+            // --- //
+            foreach (var detail in Details)
+            {
+                foreach (var item in detail.BoundsDXF)
+                {
+                    dxf.Entities.Add((EntityObject)item.Clone());
+                }
+            }
+            // --- //
+
             var files = Directory.GetFiles(FolderPath);
             int cnt = 0;
             foreach (var file in files)
             {
-                if (file.Contains("\\ReadyToUpload.dxf"))
+                if (file.Contains("\\ReadyToUpload"))
                 {
                     cnt++;
                 }
@@ -152,7 +168,7 @@ namespace MainWindowsApp.Model
 
         private void AlertMessage(string param)
         {
-            MessageBox.Show("Не удалось конвертировать внутренний отступ" +
+            MessageBox.Show("Не удалось конвертировать отступ" +
             "\nОжидаемый формат:\"0.00\"" +
             $"\nПришедший формат: {param}" +
             $"\nРабота продолжена с занчением: 0", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Exclamation);

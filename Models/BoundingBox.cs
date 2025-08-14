@@ -25,6 +25,19 @@ public class BoundingBox
         Area = Width * Height;
     }
 
+    public BoundingBox(BoundingBox bounds)
+    {
+        MinX = bounds.MinX;
+        MaxX = bounds.MaxX;
+        MinY = bounds.MinY;
+        MaxY = bounds.MaxY;
+
+        Width = Math.Abs(MaxX - MinX);
+        Height = Math.Abs(MaxY - MinY);
+
+        Area = Width * Height;
+    }
+
     public BoundingBox(Vector2 leftX_upY, double width, double height)
     {
         MinX = leftX_upY.X;

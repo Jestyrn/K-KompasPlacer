@@ -11,10 +11,9 @@
         ResizeMode="NoResize"
         AllowsTransparency="True"
         Background="Transparent">
-    
+
     <Window.DataContext>
-        <!-- <vm:AppViewModel/> -->
-            <vm:AppViewModel/>
+        <vm:AppViewModel/>
     </Window.DataContext>
 
     <Window.Resources>

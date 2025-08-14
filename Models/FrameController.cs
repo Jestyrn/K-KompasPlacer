@@ -84,6 +84,19 @@ namespace TestModule
         private void PlaceDetail(FramePackage package, Detail detail, Vector2 position)
         {
             detail.MoveDetail(position.X, position.Y);
+
+            if (position.X == package.Frame.BoundingBox.MinX)
+            {
+                detail.AddPading(left: detail.LeftPading);
+                detail.MoveDetail(0, position.Y);
+            }
+
+            if (position.Y == package.Frame.BoundingBox.MinY)
+            {
+                detail.AddPading(up: detail.UpPading);
+                detail.MoveDetail(position.X, 0);
+            }
+            
             package.Details.Add(detail);
             package.Frame.Capacity -= detail.Area;
             package.Frame.FreeRects = UpdateFreeRects(package.Frame.FreeRects, detail.Bounds);
@@ -154,6 +167,18 @@ namespace TestModule
                 if (shouldRotate)
                     detail.RotateDetail(90);
                 placed = true;
+
+                //if (bestBox.MinX == frame.BoundingBox.MinX)
+                //    detail.AddPading(left: 0);
+
+                //if (bestBox.MinY == frame.BoundingBox.MinY)
+                //    detail.AddPading(up: 0);
+
+                //if (bestBox.MaxX == frame.BoundingBox.MaxX)
+                //    detail.AddPading(right: 0);
+
+                //if (bestBox.MaxY == frame.BoundingBox.MaxY)
+                //    detail.AddPading(down: 0);
 
                 return new Vector2(bestBox.MinX, bestBox.MinY);
             }
