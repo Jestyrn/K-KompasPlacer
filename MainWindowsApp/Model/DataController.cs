@@ -138,16 +138,6 @@ namespace MainWindowsApp.Model
             foreach (var item in ins)
                 dxf.Entities.Add((EntityObject)item.Clone());
 
-            // --- //
-            foreach (var detail in Details)
-            {
-                foreach (var item in detail.BoundsDXF)
-                {
-                    dxf.Entities.Add((EntityObject)item.Clone());
-                }
-            }
-            // --- //
-
             var files = Directory.GetFiles(FolderPath);
             int cnt = 0;
             foreach (var file in files)
