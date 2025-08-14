@@ -65,4 +65,12 @@ public class BoundingBox
         return Width >= whoInserted.Width &
                 Height >= whoInserted.Height;
     }
+
+    public bool InsideBounds(BoundingBox other)
+    {
+        return MinY >= other.MinY &&
+               MaxY <= other.MaxY &&
+               MinX <= other.MinX &&
+               MaxX >= other.MaxX;
+    }
 }
