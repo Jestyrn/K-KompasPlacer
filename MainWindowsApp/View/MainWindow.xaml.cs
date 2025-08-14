@@ -91,6 +91,8 @@ namespace MainWindowsApp
 
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
+            StartButton.IsEnabled = false;
+
             if (ReaderChosen)
             {
                 double minimumWidth = double.TryParse(MinSize.Text.Split(" : ")[0], out double a) ? a : 10000;
@@ -131,6 +133,8 @@ namespace MainWindowsApp
                     return;
                 }
             }
+
+            StartButton.IsEnabled = true;
         }
 
         private async void CheckState()
