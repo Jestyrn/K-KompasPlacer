@@ -113,6 +113,7 @@ namespace MainWindowsApp.Model
                 }
 
                 // Добавление отступа
+                Details[i].Pading = _detailsPad;
 
                 // Поворот детали широкой стороной
                 if (Details[i].Width < Details[i].Height)
