@@ -51,8 +51,7 @@ namespace TestModule
                     Vector2 newPos = FindBestPosition(frame, detail, out bool foundPosition);
                     if (!foundPosition) continue;
 
-                    PlaceDetail(package, detail, newPos);
-                    detailPlaced = true;
+                    detailPlaced = PlaceDetail(package, detail, newPos);
                     break;
                 }
 
@@ -81,13 +80,32 @@ namespace TestModule
             return Result;
         }
 
-        private void PlaceDetail(FramePackage package, Detail detail, Vector2 position)
+        private bool PlaceDetail(FramePackage package, Detail detail, Vector2 position)
         {
-            detail.MoveDetail(position.X, position.Y);
+            if (package.Frame.BoundingBox.MinX == position.X && package.Frame.BoundingBox.MinY == position.Y)
+            {
+                detail.MoveDetail(position.X, position.Y);
+            }
+            else if (package.Frame.BoundingBox.MinX == position.X)
+            {
+                detail.MoveDetail(position.X, position.Y - detail.Pading);
+            }
+            else if (package.Frame.BoundingBox.MinY == position.Y)
+            {
+                detail.MoveDetail(position.X + detail.Pading, position.Y);
+            }
+            else
+            {
+                detail.MoveDetail(position.X + detail.Pading, position.Y - detail.Pading);
+            }
+
+            if (!package.Frame.BoundingBox.InsideBounds(detail.Bounds))
+                return false;
             
             package.Details.Add(detail);
             package.Frame.Capacity -= detail.Area;
             package.Frame.FreeRects = UpdateFreeRects(package.Frame.FreeRects, detail.Bounds);
+            return true;
         }
 
         private void AddNewFrameWithDetail(Detail detail)
@@ -155,19 +173,6 @@ namespace TestModule
                 if (shouldRotate)
                     detail.RotateDetail(90);
                 placed = true;
-
-                //if (bestBox.MinX == frame.BoundingBox.MinX)
-                //    detail.AddPading(left: 0);
-
-                //if (bestBox.MinY == frame.BoundingBox.MinY)
-                //    detail.AddPading(up: 0);
-
-                //if (bestBox.MaxX == frame.BoundingBox.MaxX)
-                //    detail.AddPading(right: 0);
-
-                //if (bestBox.MaxY == frame.BoundingBox.MaxY)
-                //    detail.AddPading(down: 0);
-
                 return new Vector2(bestBox.MinX, bestBox.MinY);
             }
 
