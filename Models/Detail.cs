@@ -10,6 +10,7 @@ public class Detail : IComparable<Detail>
     public bool NeedRotate = false;
     public bool IsRotated = false;
     private bool IsRotedLoker = true;
+    public double Pading { get; set; }
 
     public List<EntityObject> Entities { get; private set; }
     private Block Block { get; set; }
