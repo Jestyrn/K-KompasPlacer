@@ -84,18 +84,6 @@ namespace TestModule
         private void PlaceDetail(FramePackage package, Detail detail, Vector2 position)
         {
             detail.MoveDetail(position.X, position.Y);
-
-            if (position.X == package.Frame.BoundingBox.MinX)
-            {
-                detail.AddPading(left: detail.LeftPading);
-                detail.MoveDetail(0, position.Y);
-            }
-
-            if (position.Y == package.Frame.BoundingBox.MinY)
-            {
-                detail.AddPading(up: detail.UpPading);
-                detail.MoveDetail(position.X, 0);
-            }
             
             package.Details.Add(detail);
             package.Frame.Capacity -= detail.Area;

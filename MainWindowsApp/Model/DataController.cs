@@ -113,10 +113,6 @@ namespace MainWindowsApp.Model
                 }
 
                 // Добавление отступа
-                Details[i].AddPading(0);
-                Details[i].Bounds = new BoundingBox(Details[i].OriginBounds);
-                
-                Details[i].AddPading(_detailsPad);
 
                 // Поворот детали широкой стороной
                 if (Details[i].Width < Details[i].Height)
