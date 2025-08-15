@@ -32,10 +32,10 @@ public class Frame
     private void CreateDxf()
     {
         Block block = new Block($"Frame{Id}");
-        block.Entities.Add(new Line(new Vector2(BoundingBox.MinX - Pading / 2, BoundingBox.MinY+Pading/2), new Vector2(BoundingBox.MaxX + Pading / 2, BoundingBox.MinY + Pading / 2)));
-        block.Entities.Add(new Line(new Vector2(BoundingBox.MaxX + Pading / 2, BoundingBox.MinY+Pading/2), new Vector2(BoundingBox.MaxX + Pading / 2, BoundingBox.MaxY - Pading/2)));
-        block.Entities.Add(new Line(new Vector2(BoundingBox.MaxX + Pading / 2, BoundingBox.MaxY - Pading / 2), new Vector2(BoundingBox.MinX - Pading / 2, BoundingBox.MaxY - Pading/2)));
-        block.Entities.Add(new Line(new Vector2(BoundingBox.MinX - Pading / 2, BoundingBox.MaxY - Pading / 2), new Vector2(BoundingBox.MinX - Pading / 2, BoundingBox.MinY + Pading / 2)));
+        block.Entities.Add(new Line(new Vector2(BoundingBox.MinX - Pading, BoundingBox.MinY + Pading), new Vector2(BoundingBox.MaxX + Pading, BoundingBox.MinY + Pading)));
+        block.Entities.Add(new Line(new Vector2(BoundingBox.MaxX + Pading, BoundingBox.MinY + Pading), new Vector2(BoundingBox.MaxX + Pading, BoundingBox.MaxY - Pading)));
+        block.Entities.Add(new Line(new Vector2(BoundingBox.MaxX + Pading, BoundingBox.MaxY - Pading), new Vector2(BoundingBox.MinX - Pading, BoundingBox.MaxY - Pading)));
+        block.Entities.Add(new Line(new Vector2(BoundingBox.MinX - Pading, BoundingBox.MaxY - Pading), new Vector2(BoundingBox.MinX - Pading, BoundingBox.MinY + Pading)));
 
         Insert = new Insert(block);
 
