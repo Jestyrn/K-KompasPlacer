@@ -19,7 +19,7 @@ namespace TestModule
 
             foreach (var block in blocks)
             {
-                foreach (var entity in block.Entities.Where(x => x.Type == EntityType.Line | x.Type == EntityType.Arc | x.Type == EntityType.Circle))
+                foreach (var entity in block.Entities.Where(x => x.Type == EntityType.Line | x.Type == EntityType.Arc | x.Type == EntityType.Circle | x.Type == EntityType.Ellipse))
                 {
                     ents.Add(entity);
                 }

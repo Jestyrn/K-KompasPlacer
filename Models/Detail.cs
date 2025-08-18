@@ -179,6 +179,12 @@ public class Detail : IComparable<Detail>
                     arc.StartAngle = NormalizeAngle(arc.StartAngle + angle);
                     arc.EndAngle = NormalizeAngle(arc.EndAngle + angle);
                     break;
+
+                case Ellipse ellipse:
+                    ellipse.Center = RotatePointAroundOrigin(ellipse.Center, cos, sin);
+                    ellipse.StartAngle = NormalizeAngle(ellipse.StartAngle + angle);
+                    ellipse.EndAngle = NormalizeAngle(ellipse.EndAngle + angle);
+                    break;
             }
         }
 
@@ -246,6 +252,10 @@ public class Detail : IComparable<Detail>
 
                 case Point p:
                     points.Add(p.Position);
+                    break;
+
+                case Ellipse ellipse:
+                    points.Add(ellipse.Center);
                     break;
             }
         }
