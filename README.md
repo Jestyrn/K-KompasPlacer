@@ -48,7 +48,12 @@
 4. **Output**  
    - After processing all parts, store them in a `FramePackage` (Frame + Parts inside)  
    - Add each `FramePackage` to `netDXF`  
-   - Save the result to `ReadyToUpload.dxf`  
+   - Save the result to `ReadyToUpload.dxf`
+
+5. **Examples of works**
+ - You can view examples of works in the `assets` folder
+ - The `Example Details.dxf` file is an example of details (the number of details has been reduced to maintain privacy)
+ - The `Example Work.dxf` file is an example of the program's functionality
 
 <hr>
 
