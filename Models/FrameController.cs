@@ -262,7 +262,7 @@ namespace TestModule
                 }
             }
 
-            return result;//.Where(r => r.Width > 0.1 && r.Height > 0.1).ToList();
+            return result;
         }
     }
 
