@@ -21,9 +21,11 @@ public class Frame
 
     public Frame(Vector2 axle, double width, double height)
     {
-        Axle = axle;
-        Width = width - Pading;
-        Height = height - Pading;
+        Bounds = new BoundingBox(axle, width, height);
+
+        Axle = new Vector2(axle.X + Pading, axle.Y - Pading);
+        Width = width - (Pading * 2);
+        Height = height - (Pading * 2);
 
         CreateBounds();
         CreateDxf();
@@ -32,10 +34,10 @@ public class Frame
     private void CreateDxf()
     {
         Block block = new Block($"Frame{Id}");
-        block.Entities.Add(new Line(new Vector2(BoundingBox.MinX - Pading, BoundingBox.MinY + Pading), new Vector2(BoundingBox.MaxX + Pading, BoundingBox.MinY + Pading)));
-        block.Entities.Add(new Line(new Vector2(BoundingBox.MaxX + Pading, BoundingBox.MinY + Pading), new Vector2(BoundingBox.MaxX + Pading, BoundingBox.MaxY - Pading)));
-        block.Entities.Add(new Line(new Vector2(BoundingBox.MaxX + Pading, BoundingBox.MaxY - Pading), new Vector2(BoundingBox.MinX - Pading, BoundingBox.MaxY - Pading)));
-        block.Entities.Add(new Line(new Vector2(BoundingBox.MinX - Pading, BoundingBox.MaxY - Pading), new Vector2(BoundingBox.MinX - Pading, BoundingBox.MinY + Pading)));
+        block.Entities.Add(new Line(new Vector2(Bounds.MinX, Bounds.MinY), new Vector2(Bounds.MaxX, Bounds.MinY)));
+        block.Entities.Add(new Line(new Vector2(Bounds.MaxX, Bounds.MinY), new Vector2(Bounds.MaxX, Bounds.MaxY)));
+        block.Entities.Add(new Line(new Vector2(Bounds.MaxX, Bounds.MaxY), new Vector2(Bounds.MinX, Bounds.MaxY)));
+        block.Entities.Add(new Line(new Vector2(Bounds.MinX, Bounds.MaxY), new Vector2(Bounds.MinX, Bounds.MinY)));
 
         Insert = new Insert(block);
 
@@ -45,7 +47,6 @@ public class Frame
     private void CreateBounds()
     {
         BoundingBox = new BoundingBox(Axle, Width, Height);
-        Bounds = BoundingBox;
 
         FreeRects = new List<BoundingBox> { BoundingBox };
         Capacity = BoundingBox.Area;
