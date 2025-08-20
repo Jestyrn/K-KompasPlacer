@@ -117,7 +117,7 @@ namespace TestModule
                 ? new Vector2(0, 0)
                 : new Vector2(framesPackages.Last().Frame.BoundingBox.MaxX + Pading + Frame.Pading, 0);
 
-            detail.MoveDetail(pos.X, pos.Y);
+            detail.MoveDetail(pos.X + Frame.Pading, pos.Y - Frame.Pading);
 
             var newPackage = new FramePackage
             {
