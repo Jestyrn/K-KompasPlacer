@@ -103,6 +103,11 @@ namespace MainWindowsApp.Model
 
         private async Task MainExecute(double width, double height)
         {
+            // Сделать копию "Детплей"
+            // Сделать передачу "Копии"
+            // Почему детали порой не ставяться
+            // Исправить
+
             for (int i = 0; i < Details.Count; i++)
             {
                 // Удаление мелких элементов
@@ -112,15 +117,16 @@ namespace MainWindowsApp.Model
                     i--;
                 }
 
-                // Добавление отступа
-                Details[i].Pading = _detailsPad;
-
-                // Поворот детали широкой стороной
-                if (Details[i].Width < Details[i].Height)
-                {
-                    Details[i].RotateDetail(90);
-                }
             }
+
+            // Поворот детали широкой стороной
+            for (int i = 0; i < Details.Count; i++) 
+                if (Details[i].Width < Details[i].Height)
+                    Details[i].RotateDetail(90);
+
+            // Отступы
+            for (int i = 0; i < Details.Count; i++) 
+                Details[i].Pading = _detailsPad;
 
             Details = Details.OrderByDescending(x => x.Area).ThenBy(x => x.Width).ToList();
 
