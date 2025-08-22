@@ -103,8 +103,6 @@ namespace MainWindowsApp.Model
 
         private async Task MainExecute(double width, double height)
         {
-            // Сделать копию "Детплей"
-            // Сделать передачу "Копии"
             // Почему детали порой не ставяться
             // Исправить
 
@@ -119,19 +117,25 @@ namespace MainWindowsApp.Model
 
             }
 
-            // Поворот детали широкой стороной
-            for (int i = 0; i < Details.Count; i++) 
+            var DetailsCopy = new List<Detail>();
+            for (int i = 0; i < Details.Count; i++)
+            {
+                // Поворот детали широкой стороной
                 if (Details[i].Width < Details[i].Height)
                     Details[i].RotateDetail(90);
 
-            // Отступы
-            for (int i = 0; i < Details.Count; i++) 
+                // Отступы
                 Details[i].Pading = _detailsPad;
+
+                // Добавление копии
+                DetailsCopy.Add(Details[i]);
+            }
 
             Details = Details.OrderByDescending(x => x.Area).ThenBy(x => x.Width).ToList();
 
+
             Frame frame = new Frame(new Vector2(0, 0), width, height);
-            var controller = new FrameController(Details, width, height, (int)_framePad, (int)_insidePad);
+            var controller = new FrameController(DetailsCopy, width, height, (int)_framePad, (int)_insidePad);
             List<Insert> ins = controller.TakeFilled();
 
             if (controller.Ex.Length > 3)
@@ -153,7 +157,7 @@ namespace MainWindowsApp.Model
                     cnt++;
                 }
             }
-            string filename = cnt == 0 ? "\\ReadyToUpload.dxf" : $"\\ReadyToUpload{cnt}.dxf";
+            string filename = cnt == 0 ? "\\ReadyToUpload.dxf" : $"\\ReadyToUpload_{cnt}.dxf";
 
             dxf.Save(FolderPath + filename);
             MessageBox.Show("Работа завершена", "Завершено", MessageBoxButton.OK, MessageBoxImage.Information);
