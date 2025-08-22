@@ -289,8 +289,160 @@ namespace TestModule
                 }
             }
 
+            result = OptimizeSplit( result );
+
             return result;
         }
+
+        private List<BoundingBox> OptimizeSplit(List<BoundingBox> rects)
+        {
+            // Делаем два сценария
+            var splitX = NormalizeAndMerge(rects, splitByX: true);
+            var splitY = NormalizeAndMerge(rects, splitByX: false);
+
+            // Считаем площадь
+            double areaX = splitX.Sum(r => r.Area);
+            double areaY = splitY.Sum(r => r.Area);
+
+            // Можно вводить более сложный критерий:
+            // например, выбрать по максимальной площади одного прямоугольника
+            double maxRectX = splitX.Max(r => r.Area);
+            double maxRectY = splitY.Max(r => r.Area);
+
+            // Тут простая логика: выбираем тот вариант, где общая площадь больше
+            if (areaX > areaY) return splitX;
+            if (areaY > areaX) return splitY;
+
+            // Если площади одинаковы — выбираем тот, где меньше прямоугольников
+            if (splitX.Count < splitY.Count) return splitX;
+            if (splitY.Count < splitX.Count) return splitY;
+
+            // Если всё одинаково — выбираем по самому крупному прямоугольнику
+            return maxRectX >= maxRectY ? splitX : splitY;
+        }
+
+        private List<BoundingBox> NormalizeAndMerge(List<BoundingBox> rects, bool splitByX)
+        {
+            var coords = splitByX
+                ? rects.SelectMany(r => new[] { r.MinX, r.MaxX }).Distinct().OrderBy(x => x).ToList()
+                : rects.SelectMany(r => new[] { r.MinY, r.MaxY }).Distinct().OrderBy(y => y).ToList();
+
+            var otherCoords = splitByX
+                ? rects.SelectMany(r => new[] { r.MinY, r.MaxY }).Distinct().OrderBy(y => y).ToList()
+                : rects.SelectMany(r => new[] { r.MinX, r.MaxX }).Distinct().OrderBy(x => x).ToList();
+
+            var cells = new List<BoundingBox>();
+
+            for (int i = 0; i < coords.Count - 1; i++)
+            {
+                for (int j = 0; j < otherCoords.Count - 1; j++)
+                {
+                    BoundingBox cell;
+                    if (splitByX)
+                        cell = new BoundingBox(coords[i], coords[i + 1], otherCoords[j], otherCoords[j + 1]);
+                    else
+                        cell = new BoundingBox(otherCoords[j], otherCoords[j + 1], coords[i], coords[i + 1]);
+
+                    if (rects.Any(r => cell.Intersects(r)))
+                    {
+                        cells.Add(cell);
+                    }
+                }
+            }
+
+            return AdvancedMerge(cells);
+        }
+
+        private List<BoundingBox> AdvancedMerge(List<BoundingBox> rects)
+        {
+            bool merged;
+            do
+            {
+                merged = false;
+
+                // Удаляем вложенные
+                for (int i = 0; i < rects.Count; i++)
+                {
+                    for (int j = rects.Count - 1; j >= 0; j--)
+                    {
+                        if (i == j) continue;
+                        if (rects[j].Intersects(rects[i]))
+                        {
+                            rects.RemoveAt(j);
+                            merged = true;
+                        }
+                    }
+                }
+
+                // Склеивание полос (по X или по Y)
+                for (int i = 0; i < rects.Count; i++)
+                {
+                    var a = rects[i];
+
+                    // Ищем все совпадающие по высоте (одинаковые MinY/MaxY)
+                    var sameRow = rects.Where(r => r.MinY == a.MinY && r.MaxY == a.MaxY).OrderBy(r => r.MinX).ToList();
+                    if (sameRow.Count > 1)
+                    {
+                        // Проверим, идут ли они подряд без разрывов
+                        bool contiguous = true;
+                        for (int k = 0; k < sameRow.Count - 1; k++)
+                        {
+                            if (sameRow[k].MaxX != sameRow[k + 1].MinX)
+                            {
+                                contiguous = false;
+                                break;
+                            }
+                        }
+
+                        if (contiguous)
+                        {
+                            var mergedBox = new BoundingBox(
+                                sameRow.First().MinX,
+                                sameRow.Last().MaxX,
+                                a.MinY,
+                                a.MaxY
+                            );
+                            rects.RemoveAll(r => sameRow.Contains(r));
+                            rects.Add(mergedBox);
+                            merged = true;
+                            break;
+                        }
+                    }
+
+                    // То же самое для колонок (по X)
+                    var sameCol = rects.Where(r => r.MinX == a.MinX && r.MaxX == a.MaxX).OrderBy(r => r.MinY).ToList();
+                    if (sameCol.Count > 1)
+                    {
+                        bool contiguous = true;
+                        for (int k = 0; k < sameCol.Count - 1; k++)
+                        {
+                            if (sameCol[k].MaxY != sameCol[k + 1].MinY)
+                            {
+                                contiguous = false;
+                                break;
+                            }
+                        }
+                        if (contiguous)
+                        {
+                            var mergedBox = new BoundingBox(
+                                a.MinX,
+                                a.MaxX,
+                                sameCol.First().MinY,
+                                sameCol.Last().MaxY
+                            );
+                            rects.RemoveAll(r => sameCol.Contains(r));
+                            rects.Add(mergedBox);
+                            merged = true;
+                            break;
+                        }
+                    }
+                }
+
+            } while (merged);
+
+            return rects;
+        }
+
     }
 
     public class FramePackage
