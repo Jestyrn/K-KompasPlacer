@@ -37,11 +37,38 @@ namespace TestModule
 
                 foreach (var package in framesPackages)
                 {
+                    if (package.isFull && (framesPackages.IndexOf(package) != framesPackages.Count)) continue;
+
+                    int cnt = framesPackages.Count;
+
+                    if (cnt > 80 && (framesPackages.IndexOf(package) > 80))
+                    {
+
+                    }
+
                     var frame = package.Frame;
 
                     bool canInsert = frame.FreeRects.Any(free =>
                         (free.Width >= detail.Width && free.Height >= detail.Height) ||
                         (free.Width >= detail.Height && free.Height >= detail.Width));
+
+                    // --- //
+
+                    var mostMinDetail = details.OrderByDescending(x => x.Area).Last();
+                    double detailMinWidth = mostMinDetail.Width;
+                    double detailMinHeight = mostMinDetail.Height;
+
+                    var bigFreeRect = frame.FreeRects.OrderByDescending(x => x.Area).First();
+                    bool normConfirm = (bigFreeRect.Width < detailMinWidth) && (bigFreeRect.Height < detailMinHeight);
+                    bool rotateConfirm = (bigFreeRect.Width < detailMinHeight) && (bigFreeRect.Height < detailMinWidth);
+
+                    if (normConfirm || rotateConfirm)
+                    {
+                        package.isFull = true;
+                        continue;
+                    }
+
+                    // --- //
 
                     if (!canInsert)
                     {
@@ -270,10 +297,12 @@ namespace TestModule
     {
         public Frame Frame;
         public List<Detail> Details;
+        public bool isFull;
 
         public FramePackage()
         {
             Details = new List<Detail>();
+            isFull = false;
         }
     }
 }
