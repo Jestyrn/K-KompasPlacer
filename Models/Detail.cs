@@ -250,9 +250,9 @@ public class Detail : IComparable<Detail>
                     points.Add(line.EndPoint);
                     break;
 
-                case Point p:
-                    points.Add(p.Position);
-                    break;
+                //case Point p:
+                //    points.Add(p.Position);
+                //    break;
 
                 case Ellipse ellipse:
                     points.Add(ellipse.Center);
