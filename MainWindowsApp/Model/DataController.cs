@@ -44,8 +44,17 @@ namespace MainWindowsApp.Model
 
             Details = DetailsProcessor.GetAllDetails(reader);
 
-            double width = Details.Max(x => x.Width);
-            double height = Details.Max(x => x.Height);
+            for (int i = 0; i < Details.Count; i++)
+            {
+                if (Details[i].Width < Details[i].Height)
+                    Details[i].RotateDetail(90);
+            }
+
+            var BiggesDetail = Details.OrderByDescending(detail => detail.Width).First();
+
+            double width = BiggesDetail.Width;
+            double height = BiggesDetail.Height;
+
             double area = width * height;
             double sumArea = Details.Sum(x => x.Area);
 
