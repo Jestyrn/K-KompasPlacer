@@ -125,7 +125,7 @@ namespace MainWindowsApp.Model
                     Details[i].RotateDetail(90);
 
                 // Отступы
-                Details[i].Pading = _detailsPad;
+                Details[i].Padding = _detailsPad;
 
                 // Добавление копии
                 DetailsCopy.Add(Details[i]);

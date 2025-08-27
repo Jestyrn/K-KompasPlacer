@@ -113,19 +113,19 @@ namespace TestModule
         {
             if (package.Frame.BoundingBox.MinX == position.X && package.Frame.BoundingBox.MinY == position.Y)
             {
-                detail.MoveDetail(position.X, position.Y);
+                detail.MoveTo(position.X, position.Y);
             }
             else if (package.Frame.BoundingBox.MinX == position.X)
             {
-                detail.MoveDetail(position.X, position.Y - detail.Pading);
+                detail.MoveTo(position.X, position.Y - detail.Padding);
             }
             else if (package.Frame.BoundingBox.MinY == position.Y)
             {
-                detail.MoveDetail(position.X + detail.Pading, position.Y);
+                detail.MoveTo(position.X + detail.Padding, position.Y);
             }
             else
             {
-                detail.MoveDetail(position.X + detail.Pading, position.Y - detail.Pading);
+                detail.MoveTo(position.X + detail.Padding, position.Y - detail.Padding);
             }
 
             if (package.Frame.BoundingBox.Intersects(detail.Bounds))
@@ -144,7 +144,7 @@ namespace TestModule
                 ? new Vector2(0, 0)
                 : new Vector2(framesPackages.Last().Frame.BoundingBox.MaxX + Pading + Frame.Pading, 0);
 
-            detail.MoveDetail(pos.X + Frame.Pading, pos.Y - Frame.Pading);
+            detail.MoveTo(pos.X + Frame.Pading, pos.Y - Frame.Pading);
 
             var newPackage = new FramePackage
             {
