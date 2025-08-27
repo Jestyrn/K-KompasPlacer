@@ -34,7 +34,7 @@
             <Setter Property="IsEnabled" Value="False"/>
         </Style>
     </Window.Resources>
-    
+
     <Border CornerRadius="24" Background="#001930">
         <Grid>
             <!-- Основной контент окна -->
@@ -212,22 +212,22 @@
                                     </Border>
 
                                     <Border Grid.Column="2" Grid.Row="0" CornerRadius="0 16 16 0" Background="#043056" Margin="0 0 0 16">
-                                        <TextBlock Style="{StaticResource TextStyle}" x:Name="DetailsCount" Text="{Binding Frame.DetailsCount, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <TextBlock Style="{StaticResource TextStyle}" x:Name="DetailsCount" Text="{Binding DetailsCount, UpdateSourceTrigger=PropertyChanged}"/>
                                     </Border>
                                     <Border Grid.Column="2" Grid.Row="1" CornerRadius="0 16 16 0" Background="#043056" Margin="0 0 0 16">
-                                        <TextBlock Style="{StaticResource TextStyle}" x:Name="MinSize" Text="{Binding Frame.MinSize, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <TextBlock Style="{StaticResource TextStyle}" x:Name="MinSize" Text="{Binding MinSize, UpdateSourceTrigger=PropertyChanged}"/>
                                     </Border>
                                     <Border Grid.Column="2" Grid.Row="2" CornerRadius="0 16 16 0" Background="#043056" Margin="0 0 0 16">
-                                        <TextBlock Style="{StaticResource TextStyle}" x:Name="CurrentSize" Text="{Binding InputView.FrameSize, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <TextBlock Style="{StaticResource TextStyle}" x:Name="CurrentSize" Text="{Binding FrameSize, UpdateSourceTrigger=PropertyChanged}"/>
                                     </Border>
                                     <Border Grid.Column="2" Grid.Row="3" CornerRadius="0 16 16 0" Background="#043056" Margin="0 0 0 16">
-                                        <TextBlock Style="{StaticResource TextStyle}" x:Name="MinCount" Text="{Binding Frame.MinFrames, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <TextBlock Style="{StaticResource TextStyle}" x:Name="MinCount" Text="{Binding MinFrames, UpdateSourceTrigger=PropertyChanged}"/>
                                     </Border>
                                     <Border Grid.Column="2" Grid.Row="4" CornerRadius="0 16 16 0" Background="#043056" Margin="0 16 0 0">
-                                        <TextBlock Style="{StaticResource TextStyle}" x:Name="FileName" Text="{Binding Frame.NameOfFile, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <TextBlock Style="{StaticResource TextStyle}" x:Name="FileName" Text="{Binding NameOfFile, UpdateSourceTrigger=PropertyChanged}"/>
                                     </Border>
                                     <Border Grid.Column="2" Grid.Row="5" CornerRadius="0 16 16 0" Background="#043056" Margin="0 16 0 0">
-                                        <TextBlock Style="{StaticResource TextStyle}" x:Name="SaveFolder" Text="{Binding Frame.NameOfFolder, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <TextBlock Style="{StaticResource TextStyle}" x:Name="SaveFolder" Text="{Binding NameOfFolder, UpdateSourceTrigger=PropertyChanged}"/>
                                     </Border>
                                 </Grid>
                             </Border>
@@ -274,16 +274,16 @@
                                     </Border>
 
                                     <Border Grid.Column="2" Grid.Row="0" CornerRadius="0 16 16 0" Background="#043056" Margin="0 0 0 10">
-                                        <TextBox Style="{StaticResource TextBoxStyle}" x:Name="RealSize" Text="{Binding InputView.FrameSize, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <TextBox Style="{StaticResource TextBoxStyle}" x:Name="RealSize" Text="{Binding FrameSize, UpdateSourceTrigger=PropertyChanged}"/>
                                     </Border>
                                     <Border Grid.Column="2" Grid.Row="1" CornerRadius="0 16 16 0" Background="#043056" Margin="0 0 0 10">
-                                        <TextBox Style="{StaticResource TextBoxStyle}" x:Name="BorderPading" Text="{Binding InputView.PadingInside, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <TextBox Style="{StaticResource TextBoxStyle}" x:Name="BorderPading" Text="{Binding PadingInside, UpdateSourceTrigger=PropertyChanged}"/>
                                     </Border>
                                     <Border Grid.Column="2" Grid.Row="2" CornerRadius="0 16 16 0" Background="#043056" Margin="0 0 0 10">
-                                        <TextBox Style="{StaticResource TextBoxStyle}" x:Name="ListPading" Text="{Binding InputView.FramePading, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <TextBox Style="{StaticResource TextBoxStyle}" x:Name="ListPading" Text="{Binding FramePading, UpdateSourceTrigger=PropertyChanged}"/>
                                     </Border>
                                     <Border Grid.Column="2" Grid.Row="3" CornerRadius="0 16 16 0" Background="#043056" Margin="0 0 0 10">
-                                        <TextBox Style="{StaticResource TextBoxStyle}" x:Name="DetailsPading" Text="{Binding InputView.DetailPading, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <TextBox Style="{StaticResource TextBoxStyle}" x:Name="DetailsPading" Text="{Binding DetailPading, UpdateSourceTrigger=PropertyChanged}"/>
                                     </Border>
                                 </Grid>
                             </Border>

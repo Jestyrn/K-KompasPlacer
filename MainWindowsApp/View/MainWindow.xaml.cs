@@ -25,7 +25,7 @@ namespace MainWindowsApp
             InitializeComponent();
             ViewModel = new AppViewModel();
             Controller = new DataController();
-            DataContext = ViewModel;
+            ViewModel = (AppViewModel)DataContext;
         }
 
         private void DragWindow(object sender, MouseButtonEventArgs e)
@@ -158,10 +158,11 @@ namespace MainWindowsApp
 
         private void UpdateUIWithData()
         {
-            ViewModel.Frame.DetailsCount = Controller.DetailsCount;
-            ViewModel.Frame.MinSize = Controller.MinSize;
-            ViewModel.Frame.MinFrames = Controller.FramesCount;
-            ViewModel.InputView.FrameSize = Controller.MinSize;
+            ViewModel.DetailsCount = Controller.DetailsCount;
+            ViewModel.MindMinSize = Controller.MinSize;
+            ViewModel.MinSize = Controller.MinSize;
+            ViewModel.MinFrames = Controller.FramesCount;
+            ViewModel.FrameSize = Controller.MinSize;
         }
     }
 }
