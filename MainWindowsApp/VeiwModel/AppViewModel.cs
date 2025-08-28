@@ -75,6 +75,7 @@ namespace MainWindowsApp.VeiwModel
         }
 
         public string MindMinSize = "1 : 1";
+        public string MindDetailsArea = "100";
         private string _minSize;
         public string MinSize
         {
@@ -152,9 +153,6 @@ namespace MainWindowsApp.VeiwModel
             int pading = int.TryParse(PadingInside, out b) ? b : 1;
 
             MinSize = $"{minWidth + (pading * 2)} : {minHeight + (pading * 2)}";
-
-            int cnt = count <= 0 ? 1 : count;
-            MinFrames = $"{(currentWidth * currentHeight * count) / (currentHeight * currentWidth)}";
         }
 
         private string CheckFormat(string size)
