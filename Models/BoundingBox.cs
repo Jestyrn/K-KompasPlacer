@@ -60,10 +60,10 @@ public class BoundingBox
                MaxY < other.MinY;
     }
 
-    public bool CanInsert(BoundingBox whoInserted)
+    public bool CanInsert(BoundingBox other)
     {
-        return Width >= whoInserted.Width &
-                Height >= whoInserted.Height;
+        return Width >= other.Width &
+                Height >= other.Height;
     }
 
     public bool InsideBounds(BoundingBox other)
