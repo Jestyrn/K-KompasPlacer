@@ -28,7 +28,7 @@ public class Detail : IComparable<Detail>
     private bool _rotationLocker = true; // когда true — не помечаем как 'IsRotated' (используется при инициализации)
 
     // Исправленное имя свойства: Padding (раньше было Pading)
-    public double Padding { get; set; } = 0.0;
+    //public double Padding { get; set; } = 0.0;
 
     public List<EntityObject> Entities { get; private set; } = new List<EntityObject>();
     private Block Block { get; set; }
@@ -40,6 +40,7 @@ public class Detail : IComparable<Detail>
     public double Area { get; private set; }
     public BoundingBox Bounds { get; private set; }
     public List<EntityObject> BoundsDXF { get; private set; } = new List<EntityObject>();
+    public Insert BoundsInsert { get; private set; }
 
     private List<Vector3> points = new List<Vector3>();
 
@@ -54,7 +55,7 @@ public class Detail : IComparable<Detail>
         Id = Interlocked.Increment(ref _idCounter);
         Name = $"Detail{Id}";
 
-        Padding = padding;
+        //Padding = padding;
         _rotationLocker = true; // блокируем пометку IsRotated на время подготовки
 
         // клонируем сразу — защищаем оригинальные объекты от внешних изменений
@@ -158,8 +159,8 @@ public class Detail : IComparable<Detail>
             var pts = CollectPointsFromEntities(testEntities);
             GetMinMaxFromPoints(pts, out double tMinX, out double tMaxX, out double tMinY, out double tMaxY);
 
-            double w = Math.Abs(tMaxX - tMinX) + 2.0 * Padding;
-            double h = Math.Abs(tMaxY - tMinY) + 2.0 * Padding;
+            double w = Math.Abs(tMaxX - tMinX);// + 2.0 * Padding;
+            double h = Math.Abs(tMaxY - tMinY);// + 2.0 * Padding;
             double area = w * h;
 
             if (area < bestArea)
@@ -276,16 +277,16 @@ public class Detail : IComparable<Detail>
 
     private void FindGeometry()
     {
-        Width = Math.Abs(maxX - minX) + 2.0 * Padding;
-        Height = Math.Abs(maxY - minY) + 2.0 * Padding;
+        Width = Math.Abs(maxX - minX);// + 2.0 * Padding;
+        Height = Math.Abs(maxY - minY);// + 2.0 * Padding;
 
         // корректный центр в мировой системе координат
         Center = new Vector3((minX + maxX) / 2.0, (minY + maxY) / 2.0, 0);
 
-        double pMinX = minX - Padding;
-        double pMinY = minY - Padding;
-        double pMaxX = maxX + Padding;
-        double pMaxY = maxY + Padding;
+        double pMinX = minX;// - Padding;
+        double pMinY = minY;// - Padding;
+        double pMaxX = maxX;// + Padding;
+        double pMaxY = maxY;// + Padding;
 
         Area = Math.Abs(pMaxX - pMinX) * Math.Abs(pMaxY - pMinY);
 
@@ -298,6 +299,8 @@ public class Detail : IComparable<Detail>
             new Line(new Vector2(pMaxX, pMaxY), new Vector2(pMaxX, pMinY)),
             new Line(new Vector2(pMaxX, pMinY), new Vector2(pMinX, pMinY)),
         };
+
+        BoundsInsert = new Insert(new Block($"{Name}_BBOX", BoundsDXF));
     }
 
     private void FindMinMax()
