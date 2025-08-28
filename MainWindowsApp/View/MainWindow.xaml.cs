@@ -163,6 +163,7 @@ namespace MainWindowsApp
             ViewModel.MinSize = Controller.MinSize;
             ViewModel.MinFrames = Controller.FramesCount;
             ViewModel.FrameSize = Controller.MinSize;
+            ViewModel.MindDetailsArea = Controller.MindDetailsCount;
         }
     }
 }
