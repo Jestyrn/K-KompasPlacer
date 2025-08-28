@@ -25,6 +25,7 @@ namespace MainWindowsApp.Model
         public string PadingInside {  get; set; }
         public string PadingFrame {  get; set; }
         public string PadingDetails {  get; set; }
+        public string MindDetailsCount {  get; set; }
 
 
         private double _insidePad;
@@ -50,16 +51,16 @@ namespace MainWindowsApp.Model
                     Details[i].RotateDetail(90);
             }
 
-            var BiggesDetail = Details.OrderByDescending(detail => detail.Width).First();
+            Details = Details.OrderByDescending(detail => detail.Area).ToList();
 
-            double width = BiggesDetail.Width;
-            double height = BiggesDetail.Height;
+            double width = Details.OrderByDescending(detail => detail.Bounds.Width).First().Bounds.Width;
+            double height = Details.OrderByDescending(detail => detail.Bounds.Height).First().Bounds.Height;
 
             double area = width * height;
             double sumArea = Details.Sum(x => x.Area);
 
             DetailsCount = Details.Count.ToString();
-            MinSize = $"{(int)width + 1} : {(int)height + 1}";
+            MinSize = $"{(int)width+1} : {(int)height+1}";
             FramesCount = $"{(int)(sumArea / area)}";
 
             return true;
@@ -144,8 +145,8 @@ namespace MainWindowsApp.Model
 
 
             Frame frame = new Frame(new Vector2(0, 0), width, height);
-            var controller = new FrameController(DetailsCopy, width, height, (int)_framePad, (int)_insidePad);
-            List<Insert> ins = controller.TakeFilled();
+            var controller = new FrameController(DetailsCopy, width, height, (int)_insidePad, (int)_framePad, (int)_detailsPad);
+            List<Insert> ins = controller.Execute();
 
             if (controller.Ex.Length > 3)
             {
