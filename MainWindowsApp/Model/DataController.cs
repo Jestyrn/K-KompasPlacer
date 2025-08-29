@@ -135,16 +135,15 @@ namespace MainWindowsApp.Model
                     Details[i].RotateDetail(90);
 
                 // Отступы
-                Details[i].Padding = _detailsPad;
+                //Details[i].Padding = _detailsPad;
 
                 // Добавление копии
                 DetailsCopy.Add(Details[i]);
             }
 
-            Details = Details.OrderByDescending(x => x.Area).ThenBy(x => x.Width).ToList();
+            Details = Details.OrderByDescending(x => x.Area).ThenBy(x => x.Width).ThenBy(x => x.Height).ToList();
+            //Details = Details.OrderByDescending(x => x.Width).ThenBy(x => x.Height).ToList();
 
-
-            Frame frame = new Frame(new Vector2(0, 0), width, height);
             var controller = new FrameController(DetailsCopy, width, height, (int)_insidePad, (int)_framePad, (int)_detailsPad);
             List<Insert> ins = controller.Execute();
 

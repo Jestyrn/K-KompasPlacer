@@ -1,6 +1,7 @@
 ﻿using netDxf;
 using netDxf.Blocks;
 using netDxf.Entities;
+using System.Collections.Generic;
 
 public class Frame
 {
@@ -13,6 +14,7 @@ public class Frame
     public Insert Insert { get; private set; }
     public List<EntityObject> Entities { get; private set; }
     public List<BoundingBox> FreeRects { get; set; }
+
     public double Capacity { get; set; }
 
     private Vector2 Axle;
@@ -29,6 +31,25 @@ public class Frame
 
         CreateBounds();
         CreateDxf();
+    }
+
+    public List<Insert> TakeFreeRectsDxf()
+    {
+        List<EntityObject> ents = new List<EntityObject>();
+        List<Insert> ins = new List<Insert>(); 
+
+        foreach (var free in FreeRects)
+        {
+            ents.Add(new Line(new Vector2(free.MinX, free.MinY), new Vector2(free.MaxX, free.MinY)));
+            ents.Add(new Line(new Vector2(free.MaxX, free.MinY), new Vector2(free.MaxX, free.MaxY)));
+            ents.Add(new Line(new Vector2(free.MaxX, free.MaxY), new Vector2(free.MinX, free.MaxY)));
+            ents.Add(new Line(new Vector2(free.MinX, free.MaxY), new Vector2(free.MinX, free.MinY)));
+
+            ins.Add(new Insert(new Block($"Frame_Free{Id}-res", ents)));
+            ents.Clear();
+        }
+
+        return ins;
     }
 
     private void CreateDxf()
@@ -48,7 +69,8 @@ public class Frame
     {
         BoundingBox = new BoundingBox(Axle, Width, Height);
 
-        FreeRects = new List<BoundingBox> { BoundingBox };
+        FreeRects = new List<BoundingBox>();
+        FreeRects.Add(BoundingBox);
         Capacity = BoundingBox.Area;
     }
 }

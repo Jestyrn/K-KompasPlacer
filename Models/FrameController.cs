@@ -100,6 +100,8 @@ namespace TestModule
 
         private bool TryPlace(FramePackage pack, Detail detail, Vector2 pos, bool willRotaed, out bool placed)
         {
+            if (willRotaed) detail.RotateDetail(90);
+
             placed = false;
             var frame = pack.Frame;
             var bounds = detail.Bounds;
@@ -110,17 +112,27 @@ namespace TestModule
                 pos.Y,
                 pos.Y - bounds.Height);
 
+
             double newX1 = futureBox.MinX;
             double newY1 = futureBox.MinY;
             double newX2 = futureBox.MaxX + DetailPading > frame.BoundingBox.MaxX ? -1 : futureBox.MaxX + DetailPading;
             double newY2 = futureBox.MaxY - DetailPading < frame.BoundingBox.MaxY ? 1 : futureBox.MaxY - DetailPading;
 
-            if (newX2 == -1 || newY2 == 1) return false;
-
+            if (newX2 == -1 || newY2 == 1)
+            {
+                if (willRotaed)
+                    detail.RotateDetail(-90);
+                return false;
+            }
+             
             var paddedBox = new BoundingBox(newX1, newX2, newY1, newY2);
-            if (!frame.BoundingBox.InsideBounds(paddedBox)) return false;
+            if (!frame.BoundingBox.InsideBounds(paddedBox))
+            {
+                if (willRotaed)
+                    detail.RotateDetail(-90);
+                return false;
+            }
 
-            if (willRotaed) detail.RotateDetail(90);
 
             detail.MoveTo(paddedBox.MinX, paddedBox.MinY);
 
@@ -189,6 +201,7 @@ namespace TestModule
                 pos.X + detail.Bounds.Width + DetailPading,
                 pos.Y,
                 pos.Y - detail.Bounds.Height - DetailPading);
+            // Пофиксить MaxY
 
             newPack.Frame.Capacity -= detail.Area;
             newPack.Frame.FreeRects = UpdateFreeRects(newPack.Frame.FreeRects, det);
@@ -258,6 +271,7 @@ namespace TestModule
             result = PruneContainedRects(result);
             result = MergeAdjacentRects(result);
             // result = SimpleMerge(result);
+
             return result;
         }
 
