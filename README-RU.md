@@ -15,7 +15,7 @@
   <img src="https://github.com/Jestyrn/K-KompasPlacer/blob/master/Readme/ProgramView.png" width="700">
 </p>
 
-<h2>✅Готово к тестированию✅</h2>
+<h2>✅ Есть релиз ✅</h2>
 
 <h2>Как этим пользоваться?</h2>
 
